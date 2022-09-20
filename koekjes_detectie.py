@@ -31,22 +31,25 @@ def nothing(x):
 def static_images():
     # Show Static images
     # RGB - Blue
-    cv2.imshow('B-RGB',image_RGB[:, :, 0])
+    cv2.imshow('B-RGB', image_RGB[:, :, 0])
     # RGB - Green
-    cv2.imshow('G-RGB',image_RGB[:, :, 1])
+    cv2.imshow('G-RGB', image_RGB[:, :, 1])
     # RGB Red
-    cv2.imshow('R-RGB',image_RGB[:, :, 2])
+    cv2.imshow('R-RGB', image_RGB[:, :, 2])
     # HSV - H
-    cv2.imshow('H-HSV',image_HSV[:, :, 0])
+    cv2.imshow('H-HSV', image_HSV[:, :, 0])
     # HSV - S
-    cv2.imshow('S-HSV',image_HSV[:, :, 1]) # Good
+    cv2.imshow('S-HSV', image_HSV[:, :, 1]) # Good
     # HSV - V
-    cv2.imshow('V-HSV',image_HSV[:, :, 2])
+    cv2.imshow('V-HSV', image_HSV[:, :, 2])
+    # HSV
     cv2.imshow("HSV", image_HSV)    # Good
+    # RGB
     cv2.imshow("RGB", image_RGB)    # Good
-    
+    # Original image
     cv2.imshow("original_image", original_image)
-    cv2.imshow("Grayw", gray_image)
+    # Grayscaled image
+    cv2.imshow("Gray", gray_image)
 
 
 def binary_conversion(image_to_binary, name):
@@ -90,7 +93,7 @@ cv2.createTrackbar('Next Photo', 'image', 0, 1, nothing)
 # end Trackbars
 
 # reading all pictures
-for filename in glob.glob('D:\OneDrive - Stichting Hogeschool Utrecht\School\Derde jaar\Beeldherkenning\Images\Test Samples\*\*.png'):
+for filename in glob.glob('L:\Onedrive Julius\OneDrive - Stichting Hogeschool Utrecht\School\Derde jaar\Beeldherkenning\Images\Test Samples\*\*.png'):
     # read pic into variable
     image = cv2.imread(filename)
     
