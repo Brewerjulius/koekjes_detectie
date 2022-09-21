@@ -75,30 +75,15 @@ def image_contour_create(binary_image, original_image, name):
     cv2.imshow(name, image_copy)
 
 
-def image_contour_show():
-    # Using Canny to make edges
-    edges_gray = cv2.Canny(gray_image, Min, Max)
-    edge_image_HSV_S = cv2.Canny(image_HSV_S, Min, Max)
-    edge_image_HSV = cv2.Canny(image_HSV, Min, Max)
-    edge_image_RGB = cv2.Canny(image_RGB, Min, Max)
+def erosion_dilation(img, kernel_1, kernel_2, iterations_trackbar):
+    kernel = np.ones((kernel_1, kernel_2), np.uint8)
 
-    cv2.imshow("Edges", edges_gray)
-    cv2.imshow("edge_HSV_S", edge_image_HSV_S)
-    cv2.imshow("edge_HSV", edge_image_HSV)
-    cv2.imshow("edge_RGB", edge_image_RGB)
-
-    # image_contour_create(binary_gray, gray_image, "gray_image")
-    # image_contour_create(binary_HSV_S, image_HSV_S, "image_HSV_S")
-    # image_contour_create(binary_HSV, image_HSV, "image_HSV")
-
-    image_contour_create(edges_gray, gray_image, "Contours Gray Image")
-    image_contour_create(edge_image_HSV_S, image_HSV_S, "Contours HSV S Image")
-    image_contour_create(edge_image_HSV, image_HSV, "Contours HSV Image")
-    image_contour_create(edge_image_RGB, image_RGB, "Contours RGB Image")
+    img_erosion = cv2.erode(img, kernel, iterations=iterations_trackbar)
+    img_dilation = cv2.dilate(img, kernel, iterations=iterations_trackbar)
+    return img_erosion, img_dilation
 
 
 def trackbars():
-    # Creating a window with black image
     img = np.zeros((300, 512, 3), np.uint8)
     cv2.namedWindow('image')
 
@@ -113,7 +98,15 @@ def trackbars():
 
     # creating trackbar for going to the next picture.
     cv2.createTrackbar('Next Photo', 'image', 0, 1, nothing)
-    # end trackbars
+
+    # creating trackbar for kernel_1
+    cv2.createTrackbar('kernel_1', 'image', 0, 10, nothing)
+
+    # creating trackbar for kernel_2
+    cv2.createTrackbar('kernel_2', 'image', 0, 10, nothing)
+
+    # creating trackbar for iterations_trackbar
+    cv2.createTrackbar('iterations_trackbar', 'image', 0, 10, nothing)
 
 trackbars()
 
@@ -121,7 +114,8 @@ trackbars()
 for filename in glob.glob('L:\Onedrive Julius\OneDrive - Stichting Hogeschool Utrecht\School\Derde jaar\Beeldherkenning\Images\Test Samples\*\*.png'):
     # read pic into variable
     image = cv2.imread(filename)
-    
+
+    #scale image
     image = Scaling(image)
     
     # Make backup of pic
@@ -131,19 +125,21 @@ for filename in glob.glob('L:\Onedrive Julius\OneDrive - Stichting Hogeschool Ut
     gray_image = image.copy()
     
     # making gray_image gray
-    #gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY) - OUD, zet in verslag
+    # gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY) - OUD, zet in verslag
     gray_image = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
     # making new image where Blue and Red channels are swapped. Eigenlijk zie je BGR
-    #image_RGB = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+    # image_RGB = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
     image_RGB = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
     # converting image to HSV 0-179 from RGB 0-255. De parameters worden 1 op 1 overgezet, en alles boven de 179 wordt verandered naar: 0 + de orginele waarde - 179
     image_HSV = cv2.cvtColor(image, cv2.COLOR_RGB2HSV)
     
     # Making a copy of an image for later processing.
     image_HSV_S = image_HSV[:, :, 1].copy()
-    
+
+    # create static windows for visualization purpose.
     static_windows()
-    
+
+    # activate main program loop.
     while(True):
         
         # for button pressing and changing
@@ -156,6 +152,9 @@ for filename in glob.glob('L:\Onedrive Julius\OneDrive - Stichting Hogeschool Ut
         Max = cv2.getTrackbarPos('Max', 'image')
         Close_Program = cv2.getTrackbarPos('Close Program', 'image')
         Next_Picture = cv2.getTrackbarPos('Next Photo', 'image')
+        kernel_1 = cv2.getTrackbarPos('kernel_1', 'image')
+        kernel_2 = cv2.getTrackbarPos('kernel_2', 'image')
+        iterations_trackbar = cv2.getTrackbarPos('iterations_trackbar', 'image')
 
         if Close_Program == 1:
             break
@@ -169,11 +168,32 @@ for filename in glob.glob('L:\Onedrive Julius\OneDrive - Stichting Hogeschool Ut
         #binary_HSV_S = Binary_conversion(image_HSV_S, "binary_HSV_S")
         #binary_HSV = Binary_conversion(image_HSV, "binary_HSV")
         #############################################################
-        image_contour_show()
+
+        # Using Canny to make edges
+        edges_gray = cv2.Canny(gray_image, Min, Max)
+        edge_image_HSV_S = cv2.Canny(image_HSV_S, Min, Max)
+        edge_image_HSV = cv2.Canny(image_HSV, Min, Max)
+        edge_image_RGB = cv2.Canny(image_RGB, Min, Max)
+
+        cv2.imshow("Edges", edges_gray)
+        cv2.imshow("edge_HSV_S", edge_image_HSV_S)
+        cv2.imshow("edge_HSV", edge_image_HSV)
+        cv2.imshow("edge_RGB", edge_image_RGB)
+
+        # zet in verslag: Contouren getest op pre processed images, resultaat was niet bruikbaar.
+        # image_contour_create(binary_gray, gray_image, "gray_image")
+        # image_contour_create(binary_HSV_S, image_HSV_S, "image_HSV_S")
+        # image_contour_create(binary_HSV, image_HSV, "image_HSV")
+
+        image_contour_create(edges_gray, gray_image, "Contours Gray Image")
+        image_contour_create(edge_image_HSV_S, image_HSV_S, "Contours HSV S Image")
+        image_contour_create(edge_image_HSV, image_HSV, "Contours HSV Image")
+        image_contour_create(edge_image_RGB, image_RGB, "Contours RGB Image")
 
 
-
-
+        edges_gray_erosion, edges_gray_dialation = erosion_dilation(edges_gray, kernel_1, kernel_2, iterations_trackbar)
+        edges_gray_erosion_dialation = np.hstack((edges_gray_erosion, edges_gray_dialation))
+        cv2.imshow("edges_gray_erosion_dialation", edges_gray_erosion_dialation)
 
 cv2.destroyAllWindows()
 
