@@ -7,7 +7,7 @@ Created on Wed Sep 14 15:32:50 2022
 
 import cv2
 import glob
-# import copy
+import copy
 import numpy as np
 # from matplotlib import pyplot as plt
 import time
@@ -53,7 +53,7 @@ def static_windows():
 
 
 def binary_conversion(image_to_binary, name):
-    image_to_binary = cv2.cvtColor(image_to_binary, cv2.COLOR_BGR2GRAY)
+    #image_to_binary = cv2.cvtColor(image_to_binary, cv2.COLOR_BGR2GRAY)
     
     ret, thresh = cv2.threshold(image_to_binary, 150, 255, cv2.THRESH_BINARY)
     # visualize the binary image
@@ -73,6 +73,8 @@ def image_contour_create(binary_image, original_image, name):
 
     # see the results
     cv2.imshow(name, image_copy)
+
+    return image_copy
 
 
 def erosion_dilation(img, kernel_1, kernel_2, iterations_trackbar):
@@ -111,7 +113,7 @@ def trackbars():
 trackbars()
 
 # reading all pictures
-for filename in glob.glob('L:\Onedrive Julius\OneDrive - Stichting Hogeschool Utrecht\School\Derde jaar\Beeldherkenning\Images\Test Samples\*\*.png'):
+for filename in glob.glob('D:\\OneDrive - Stichting Hogeschool Utrecht\\School\\Derde jaar\\Beeldherkenning\\Images\\Test Samples\\top-Test-Set\\*.png'):
     # read pic into variable
     image = cv2.imread(filename)
 
@@ -132,7 +134,7 @@ for filename in glob.glob('L:\Onedrive Julius\OneDrive - Stichting Hogeschool Ut
     image_RGB = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
     # converting image to HSV 0-179 from RGB 0-255. De parameters worden 1 op 1 overgezet, en alles boven de 179 wordt verandered naar: 0 + de orginele waarde - 179
     image_HSV = cv2.cvtColor(image, cv2.COLOR_RGB2HSV)
-    
+
     # Making a copy of an image for later processing.
     image_HSV_S = image_HSV[:, :, 1].copy()
 
@@ -189,6 +191,17 @@ for filename in glob.glob('L:\Onedrive Julius\OneDrive - Stichting Hogeschool Ut
         image_contour_create(edge_image_HSV_S, image_HSV_S, "Contours HSV S Image")
         image_contour_create(edge_image_HSV, image_HSV, "Contours HSV Image")
         image_contour_create(edge_image_RGB, image_RGB, "Contours RGB Image")
+
+
+        image_Bounding_Box = image_contour_create(edges_gray, gray_image, "Contours Gray Image")
+
+        contours, hierarchy = cv2.findContours(image=image_Bounding_Box, mode=cv2.RETR_TREE, method=cv2.CHAIN_APPROX_NONE)
+        cnt = contours[0]
+
+        rect = cv2.minAreaRect(cnt)
+        box = cv2.boxPoints(rect)
+        box = np.int0(box)
+        cv2.drawContours(original_image, [box], 0, (0, 0, 255), 2)
 
 
         edges_gray_erosion, edges_gray_dialation = erosion_dilation(edges_gray, kernel_1, kernel_2, iterations_trackbar)
