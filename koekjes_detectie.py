@@ -28,7 +28,7 @@ def nothing(x):
     pass
 
 
-def static_images():
+def static_windows():
     # Show Static images
     # RGB - Blue
     cv2.imshow('B-RGB', image_RGB[:, :, 0])
@@ -62,11 +62,11 @@ def binary_conversion(image_to_binary, name):
     return thresh
 
 
-def contours(binary_image, original_image, name):
-    # detect the contours on the binary image using cv2.CHAIN_APPROX_NONE
+def image_contour_create(binary_image, original_image, name):
+    # detect the image_contour_create on the binary image using cv2.CHAIN_APPROX_NONE
     contours, hierarchy = cv2.findContours(image=binary_image, mode=cv2.RETR_TREE, method=cv2.CHAIN_APPROX_NONE)
 
-    # draw contours on the original image
+    # draw image_contour_create on the original image
     image_copy = original_image.copy()
 
     cv2.drawContours(image=image_copy, contours=contours, contourIdx=-1, color=(0, 255, 0), thickness=2, lineType=cv2.LINE_AA)
@@ -74,23 +74,48 @@ def contours(binary_image, original_image, name):
     # see the results
     cv2.imshow(name, image_copy)
 
-# Trackbars
-# Creating a window with black image
-img = np.zeros((300, 512, 3), np.uint8)
-cv2.namedWindow('image')
- 
-# creating trackbars for Min value
-cv2.createTrackbar('Min', 'image', 0, 400, nothing)
- 
-# creating trackbars for Max value
-cv2.createTrackbar('Max', 'image', 0, 400, nothing)
 
-# creating trackbar for closing program.
-cv2.createTrackbar('Close Program', 'image', 0, 1, nothing)
+def image_contour_show():
+    # Using Canny to make edges
+    edges_gray = cv2.Canny(gray_image, Min, Max)
+    edge_image_HSV_S = cv2.Canny(image_HSV_S, Min, Max)
+    edge_image_HSV = cv2.Canny(image_HSV, Min, Max)
+    edge_image_RGB = cv2.Canny(image_RGB, Min, Max)
 
-# creating trackbar for going to the next picture.
-cv2.createTrackbar('Next Photo', 'image', 0, 1, nothing)
-# end Trackbars
+    cv2.imshow("Edges", edges_gray)
+    cv2.imshow("edge_HSV_S", edge_image_HSV_S)
+    cv2.imshow("edge_HSV", edge_image_HSV)
+    cv2.imshow("edge_RGB", edge_image_RGB)
+
+    # image_contour_create(binary_gray, gray_image, "gray_image")
+    # image_contour_create(binary_HSV_S, image_HSV_S, "image_HSV_S")
+    # image_contour_create(binary_HSV, image_HSV, "image_HSV")
+
+    image_contour_create(edges_gray, gray_image, "Contours Gray Image")
+    image_contour_create(edge_image_HSV_S, image_HSV_S, "Contours HSV S Image")
+    image_contour_create(edge_image_HSV, image_HSV, "Contours HSV Image")
+    image_contour_create(edge_image_RGB, image_RGB, "Contours RGB Image")
+
+
+def trackbars():
+    # Creating a window with black image
+    img = np.zeros((300, 512, 3), np.uint8)
+    cv2.namedWindow('image')
+
+    # creating trackbars for Min value
+    cv2.createTrackbar('Min', 'image', 0, 400, nothing)
+
+    # creating trackbars for Max value
+    cv2.createTrackbar('Max', 'image', 0, 400, nothing)
+
+    # creating trackbar for closing program.
+    cv2.createTrackbar('Close Program', 'image', 0, 1, nothing)
+
+    # creating trackbar for going to the next picture.
+    cv2.createTrackbar('Next Photo', 'image', 0, 1, nothing)
+    # end trackbars
+
+trackbars()
 
 # reading all pictures
 for filename in glob.glob('L:\Onedrive Julius\OneDrive - Stichting Hogeschool Utrecht\School\Derde jaar\Beeldherkenning\Images\Test Samples\*\*.png'):
@@ -106,15 +131,18 @@ for filename in glob.glob('L:\Onedrive Julius\OneDrive - Stichting Hogeschool Ut
     gray_image = image.copy()
     
     # making gray_image gray
-    gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    
-    image_RGB = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+    #gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY) - OUD, zet in verslag
+    gray_image = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
+    # making new image where Blue and Red channels are swapped. Eigenlijk zie je BGR
+    #image_RGB = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+    image_RGB = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+    # converting image to HSV 0-179 from RGB 0-255. De parameters worden 1 op 1 overgezet, en alles boven de 179 wordt verandered naar: 0 + de orginele waarde - 179
     image_HSV = cv2.cvtColor(image, cv2.COLOR_RGB2HSV)
     
     # Making a copy of an image for later processing.
     image_HSV_S = image_HSV[:, :, 1].copy()
     
-    static_images()
+    static_windows()
     
     while(True):
         
@@ -140,27 +168,12 @@ for filename in glob.glob('L:\Onedrive Julius\OneDrive - Stichting Hogeschool Ut
         #binary_gray = Binary_conversion(gray_image, "binary_gray")
         #binary_HSV_S = Binary_conversion(image_HSV_S, "binary_HSV_S")
         #binary_HSV = Binary_conversion(image_HSV, "binary_HSV")
-
-        #Contours(binary_gray, gray_image, "gray_image")
-        #Contours(binary_HSV_S, image_HSV_S, "image_HSV_S")
-        #Contours(binary_HSV, image_HSV, "image_HSV")
         #############################################################
+        image_contour_show()
 
-        # Using Canny to make edges
-        edges_gray = cv2.Canny(gray_image,Min,Max)
-        edge_image_HSV_S = cv2.Canny(image_HSV_S,Min,Max)
-        edge_image_HSV = cv2.Canny(image_HSV,Min,Max)
-        edge_image_RGB = cv2.Canny(image_RGB,Min,Max)
 
-        contours(edges_gray, gray_image, "Contours Gray Image")
-        contours(edge_image_HSV_S, image_HSV_S, "Contours HSV S Image")
-        contours(edge_image_HSV, image_HSV, "Contours HSV Image")
-        contours(edge_image_RGB, image_RGB, "Contours RGB Image")
 
-        cv2.imshow("Edges", edges_gray)
-        cv2.imshow("edge_HSV_S", edge_image_HSV_S)
-        cv2.imshow("edge_HSV", edge_image_HSV)
-        cv2.imshow("edge_RGB", edge_image_RGB)
+
 
 cv2.destroyAllWindows()
 

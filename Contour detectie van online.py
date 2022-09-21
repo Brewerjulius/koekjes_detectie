@@ -20,7 +20,7 @@ final_mask = ~final_mask
 final_mask = cv2.erode(final_mask, np.ones((3, 3), dtype=np.uint8))
 final_mask = cv2.dilate(final_mask, np.ones((5, 5), dtype=np.uint8))
 
-# Now you can finally find contours.
+# Now you can finally find image_contour_create.
 contours, hierarchy = cv2.findContours(final_mask.copy(), 0, 1)
 
 final_contours = []
