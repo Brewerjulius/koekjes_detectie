@@ -80,8 +80,9 @@ def image_contour_create(binary_image, original_image, name):
 def erosion_dilation(img, kernel_1, kernel_2, iterations_trackbar):
     kernel = np.ones((kernel_1, kernel_2), np.uint8)
 
-    img_erosion = cv2.erode(img, kernel, iterations=iterations_trackbar)
     img_dilation = cv2.dilate(img, kernel, iterations=iterations_trackbar)
+    img_erosion = cv2.erode(img_dilation, kernel, iterations=iterations_trackbar)
+
     return img_erosion, img_dilation
 
 
@@ -119,13 +120,13 @@ for filename in glob.glob('D:\\OneDrive - Stichting Hogeschool Utrecht\\School\\
 
     #scale image
     image = Scaling(image)
-    
+
     # Make backup of pic
     original_image=image.copy() 
     
     # Copying image to make it gray
     gray_image = image.copy()
-    
+
     # making gray_image gray
     # gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY) - OUD, zet in verslag
     gray_image = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
@@ -149,7 +150,7 @@ for filename in glob.glob('D:\\OneDrive - Stichting Hogeschool Utrecht\\School\\
         if k == 27:
             break
 
-        #Trackbar Sliders
+        # Trackbar Sliders
         Min = cv2.getTrackbarPos('Min', 'image')
         Max = cv2.getTrackbarPos('Max', 'image')
         Close_Program = cv2.getTrackbarPos('Close Program', 'image')
@@ -177,6 +178,16 @@ for filename in glob.glob('D:\\OneDrive - Stichting Hogeschool Utrecht\\School\\
         edge_image_HSV = cv2.Canny(image_HSV, Min, Max)
         edge_image_RGB = cv2.Canny(image_RGB, Min, Max)
 
+        edges_gray_erosion, edges_gray_dialation = erosion_dilation(edges_gray, kernel_1, kernel_2, iterations_trackbar)
+        edges_gray_erosion_dialation = np.hstack((edges_gray_erosion, edges_gray_dialation))
+        cv2.imshow("edges_gray_erosion_dialation", edges_gray_erosion_dialation)
+
+        mask = edges_gray_erosion
+
+        masked = cv2.bitwise_and(gray_image, gray_image, mask=mask)
+
+        cv2.imshow("masked", masked)
+
         cv2.imshow("Edges", edges_gray)
         cv2.imshow("edge_HSV_S", edge_image_HSV_S)
         cv2.imshow("edge_HSV", edge_image_HSV)
@@ -192,21 +203,68 @@ for filename in glob.glob('D:\\OneDrive - Stichting Hogeschool Utrecht\\School\\
         image_contour_create(edge_image_HSV, image_HSV, "Contours HSV Image")
         image_contour_create(edge_image_RGB, image_RGB, "Contours RGB Image")
 
-
+        ########################################
         image_Bounding_Box = image_contour_create(edges_gray, gray_image, "Contours Gray Image")
 
         contours, hierarchy = cv2.findContours(image=image_Bounding_Box, mode=cv2.RETR_TREE, method=cv2.CHAIN_APPROX_NONE)
-        cnt = contours[0]
+        cnt = contours[4]
+
+        original_image_draw = original_image.copy()
 
         rect = cv2.minAreaRect(cnt)
         box = cv2.boxPoints(rect)
         box = np.int0(box)
-        cv2.drawContours(original_image, [box], 0, (0, 0, 255), 2)
+        cv2.drawContours(original_image_draw, [box], 0, (0, 0, 255), 2)
+
+        cv2.imshow("contour_original_image", original_image_draw)
+        ###############################################################
 
 
-        edges_gray_erosion, edges_gray_dialation = erosion_dilation(edges_gray, kernel_1, kernel_2, iterations_trackbar)
-        edges_gray_erosion_dialation = np.hstack((edges_gray_erosion, edges_gray_dialation))
-        cv2.imshow("edges_gray_erosion_dialation", edges_gray_erosion_dialation)
+
+        areaArray = []
+        count = 1
+        original_image_draw2 = original_image.copy()
+
+
+        for i, c in enumerate(contours):
+            area = cv2.contourArea(c)
+            areaArray.append(area)
+
+        # first sort the array by area
+        sorteddata = sorted(zip(areaArray, contours), key=lambda x: x[0], reverse=True)
+
+        # find the nth largest contour [n-1][1], in this case 2
+        secondlargestcontour = sorteddata[1][1]
+
+        # draw it
+        x, y, w, h = cv2.boundingRect(secondlargestcontour)
+        cv2.drawContours(original_image_draw2, secondlargestcontour, -1, (255, 0, 0), 2)
+        cv2.rectangle(original_image_draw2, (x, y), (x + w, y + h), (0, 255, 0), 2)
+
+        Circle_x = int((x + x + w)/2)
+        Circle_y = int((y + y + h) / 2)
+
+        if Circle_x > x:
+            Radius = Circle_x - x
+        elif x > Circle_x:
+            Radius = x - Circle_x
+
+        cv2.circle(original_image_draw2, (Circle_x, Circle_y), Radius, (0, 0, 255), -1)
+        #maak een circle binnen het vierkant wat getekend wordt.
+        #maak het vierkant kunnen draaien.
+        #houghcricles()
+
+        #pixels van de contour optellen om ruigheid van surface te detecteren.
+
+        #LBP
+
+        #difference in gausian
+
+        #roteer fotos om het kleinst mogelijke vierkant te krijgen - voor de prins koek vooral
+
+        #hough lines voor de prins en de stroopwafel koekjes
+
+        cv2.imshow('Photos/output3.jpg', original_image_draw2)
 
 cv2.destroyAllWindows()
 
