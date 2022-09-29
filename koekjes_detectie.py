@@ -63,6 +63,8 @@ def binary_conversion(image_to_binary, name):
 
 
 def image_contour_create(binary_image, original_image, name):
+    # if name = None, no picture window will be opened.
+
     # detect the image_contour_create on the binary image using cv2.CHAIN_APPROX_NONE
     contours, hierarchy = cv2.findContours(image=binary_image, mode=cv2.RETR_TREE, method=cv2.CHAIN_APPROX_NONE)
 
@@ -71,8 +73,9 @@ def image_contour_create(binary_image, original_image, name):
 
     cv2.drawContours(image=image_copy, contours=contours, contourIdx=-1, color=(0, 255, 0), thickness=2, lineType=cv2.LINE_AA)
 
-    # see the results
-    cv2.imshow(name, image_copy)
+    if name != None:
+        # see the results
+        cv2.imshow(name, image_copy)
 
     return image_copy
 
@@ -110,6 +113,50 @@ def trackbars():
 
     # creating trackbar for iterations_trackbar
     cv2.createTrackbar('iterations_trackbar', 'image', 0, 10, nothing)
+
+def contour_drawer(image_Bounding_Box, original_image_draw, name):
+    contours, hierarchy = cv2.findContours(image=image_Bounding_Box, mode=cv2.RETR_TREE, method=cv2.CHAIN_APPROX_NONE)
+    cnt = contours[4]
+
+    rect = cv2.minAreaRect(cnt)
+    box = cv2.boxPoints(rect)
+    box = np.int0(box)
+    cv2.drawContours(original_image_draw, [box], 0, (0, 0, 255), 2)
+
+    cv2.imshow(name, original_image_draw)
+
+def box_circle_drawer(image_Bounding_Box, original_image_draw, name):
+    contours, hierarchy = cv2.findContours(image=image_Bounding_Box, mode=cv2.RETR_TREE,
+                                           method=cv2.CHAIN_APPROX_NONE)
+    areaArray = []
+    count = 1
+
+    for i, c in enumerate(contours):
+        area = cv2.contourArea(c)
+        areaArray.append(area)
+
+    # first sort the array by area
+    sorteddata = sorted(zip(areaArray, contours), key=lambda x: x[0], reverse=True)
+
+    # find the nth largest contour [n-1][1], in this case 2
+    secondlargestcontour = sorteddata[1][1]
+
+    # draw it
+    x, y, w, h = cv2.boundingRect(secondlargestcontour)
+    cv2.drawContours(original_image_draw2, secondlargestcontour, -1, (255, 0, 0), 2)
+    cv2.rectangle(original_image_draw2, (x, y), (x + w, y + h), (0, 255, 0), 2)
+
+    Circle_x = int((x + x + w) / 2)
+    Circle_y = int((y + y + h) / 2)
+
+    if Circle_x > x:
+        Radius = Circle_x - x
+    elif x > Circle_x:
+        Radius = x - Circle_x
+
+    cv2.circle(original_image_draw2, (Circle_x, Circle_y), Radius, (0, 0, 255), -1)
+
+    cv2.imshow('Photos/output3.jpg', original_image_draw2)
 
 trackbars()
 
@@ -204,67 +251,30 @@ for filename in glob.glob('D:\\OneDrive - Stichting Hogeschool Utrecht\\School\\
         image_contour_create(edge_image_RGB, image_RGB, "Contours RGB Image")
 
         ########################################
-        image_Bounding_Box = image_contour_create(edges_gray, gray_image, "Contours Gray Image")
-
-        contours, hierarchy = cv2.findContours(image=image_Bounding_Box, mode=cv2.RETR_TREE, method=cv2.CHAIN_APPROX_NONE)
-        cnt = contours[4]
-
+        image_Bounding_Box = image_contour_create(edges_gray, gray_image, None)
         original_image_draw = original_image.copy()
+        contour_drawer(image_Bounding_Box, original_image_draw, "contour_original_image")
 
-        rect = cv2.minAreaRect(cnt)
-        box = cv2.boxPoints(rect)
-        box = np.int0(box)
-        cv2.drawContours(original_image_draw, [box], 0, (0, 0, 255), 2)
-
-        cv2.imshow("contour_original_image", original_image_draw)
         ###############################################################
-
-
-
-        areaArray = []
-        count = 1
         original_image_draw2 = original_image.copy()
+        box_circle_drawer(image_Bounding_Box, original_image_draw, 'Photos/output3.jpg')
+
+        ###############################################################
+        # maak een circle binnen het vierkant wat getekend wordt.
+        # maak het vierkant kunnen draaien.
+        # houghcricles()
+
+        # pixels van de contour optellen om ruigheid van surface te detecteren.
+
+        # LBP
+
+        # difference in gausian
+
+        # roteer fotos om het kleinst mogelijke vierkant te krijgen - voor de prins koek vooral
+
+        # hough lines voor de prins en de stroopwafel koekjes
 
 
-        for i, c in enumerate(contours):
-            area = cv2.contourArea(c)
-            areaArray.append(area)
-
-        # first sort the array by area
-        sorteddata = sorted(zip(areaArray, contours), key=lambda x: x[0], reverse=True)
-
-        # find the nth largest contour [n-1][1], in this case 2
-        secondlargestcontour = sorteddata[1][1]
-
-        # draw it
-        x, y, w, h = cv2.boundingRect(secondlargestcontour)
-        cv2.drawContours(original_image_draw2, secondlargestcontour, -1, (255, 0, 0), 2)
-        cv2.rectangle(original_image_draw2, (x, y), (x + w, y + h), (0, 255, 0), 2)
-
-        Circle_x = int((x + x + w)/2)
-        Circle_y = int((y + y + h) / 2)
-
-        if Circle_x > x:
-            Radius = Circle_x - x
-        elif x > Circle_x:
-            Radius = x - Circle_x
-
-        cv2.circle(original_image_draw2, (Circle_x, Circle_y), Radius, (0, 0, 255), -1)
-        #maak een circle binnen het vierkant wat getekend wordt.
-        #maak het vierkant kunnen draaien.
-        #houghcricles()
-
-        #pixels van de contour optellen om ruigheid van surface te detecteren.
-
-        #LBP
-
-        #difference in gausian
-
-        #roteer fotos om het kleinst mogelijke vierkant te krijgen - voor de prins koek vooral
-
-        #hough lines voor de prins en de stroopwafel koekjes
-
-        cv2.imshow('Photos/output3.jpg', original_image_draw2)
 
 cv2.destroyAllWindows()
 
