@@ -2,7 +2,7 @@ import numpy as np
 import cv2
 import glob
 
-for filename in glob.glob('D:\\OneDrive - Stichting Hogeschool Utrecht\\School\\Derde jaar\\Beeldherkenning\\Images\\Test Samples\\top-Test-Set\\*.png'):
+for filename in glob.glob('L:\\Onedrive Julius\\OneDrive - Stichting Hogeschool Utrecht\\School\\Derde jaar\\Beeldherkenning\\Images\\Test Samples\\top-Test-Set\\*.png'):
     # read pic into variable
     img = cv2.imread(filename, 0)
 

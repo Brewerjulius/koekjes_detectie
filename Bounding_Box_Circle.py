@@ -36,7 +36,7 @@ def thresh_callback(val):
     cv2.imshow('Contours', drawing)
 
 
-for filename in glob.glob('D:\\OneDrive - Stichting Hogeschool Utrecht\\School\\Derde jaar\\Beeldherkenning\\Images\\Test Samples\\top-Test-Set\\*.png'):
+for filename in glob.glob('L:\\Onedrive Julius\\OneDrive - Stichting Hogeschool Utrecht\\School\\Derde jaar\\Beeldherkenning\\Images\\Test Samples\\top-Test-Set\\*.png'):
     # read pic into variable
     src = cv2.imread(filename)
 

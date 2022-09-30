@@ -15,12 +15,12 @@ import time
 
 def Scaling(image_for_scaling):
     # Scaling setup
-    scale_percent = 30 # percent of original size
+    scale_percent = 30  # percent of original size
     width = int(image.shape[1] * scale_percent / 100)
     height = int(image.shape[0] * scale_percent / 100)
     dim = (width, height)
     # resize image
-    image_for_scaling = cv2.resize(image_for_scaling, dim, interpolation = cv2.INTER_AREA)
+    image_for_scaling = cv2.resize(image_for_scaling, dim, interpolation=cv2.INTER_AREA)
     return image_for_scaling
 
 
@@ -31,30 +31,31 @@ def nothing(x):
 def static_windows():
     # Show Static images
     # RGB - Blue
-    cv2.imshow('B-RGB', image_RGB[:, :, 0])
-    # RGB - Green
-    cv2.imshow('G-RGB', image_RGB[:, :, 1])
-    # RGB Red
-    cv2.imshow('R-RGB', image_RGB[:, :, 2])
-    # HSV - H
-    cv2.imshow('H-HSV', image_HSV[:, :, 0])
-    # HSV - S
-    cv2.imshow('S-HSV', image_HSV[:, :, 1]) # Good
-    # HSV - V
-    cv2.imshow('V-HSV', image_HSV[:, :, 2])
-    # HSV
-    cv2.imshow("RGB 0-255 > HSV 0-179", image_HSV)    # Good
-    # RGB
-    cv2.imshow("RGB - Blue Red channel swap", image_RGB)    # Good
-    # Original image
+    if True == False:
+        cv2.imshow('B-RGB', image_RGB[:, :, 0])
+        # RGB - Green
+        cv2.imshow('G-RGB', image_RGB[:, :, 1])
+        # RGB Red
+        cv2.imshow('R-RGB', image_RGB[:, :, 2])
+        # HSV - H
+        cv2.imshow('H-HSV', image_HSV[:, :, 0])
+        # HSV - S
+        cv2.imshow('S-HSV', image_HSV[:, :, 1])  # Good
+        # HSV - V
+        cv2.imshow('V-HSV', image_HSV[:, :, 2])
+        # HSV
+        cv2.imshow("RGB 0-255 > HSV 0-179", image_HSV)  # Good
+        # RGB
+        cv2.imshow("RGB - Blue Red channel swap", image_RGB)  # Good
+        # Original image
     cv2.imshow("original_image", original_image)
     # Grayscaled image
     cv2.imshow("Gray", gray_image)
 
 
 def binary_conversion(image_to_binary, name):
-    #image_to_binary = cv2.cvtColor(image_to_binary, cv2.COLOR_BGR2GRAY)
-    
+    # image_to_binary = cv2.cvtColor(image_to_binary, cv2.COLOR_BGR2GRAY)
+
     ret, thresh = cv2.threshold(image_to_binary, 150, 255, cv2.THRESH_BINARY)
     # visualize the binary image
     cv2.imshow(name, thresh)
@@ -71,7 +72,8 @@ def image_contour_create(binary_image, original_image, name):
     # draw image_contour_create on the original image
     image_copy = original_image.copy()
 
-    cv2.drawContours(image=image_copy, contours=contours, contourIdx=-1, color=(0, 255, 0), thickness=2, lineType=cv2.LINE_AA)
+    cv2.drawContours(image=image_copy, contours=contours, contourIdx=-1, color=(0, 255, 0), thickness=2,
+                     lineType=cv2.LINE_AA)
 
     if name != None:
         # see the results
@@ -119,6 +121,7 @@ def trackbars():
     # creating trackbar for iterations_trackbar
     cv2.createTrackbar('iterations_trackbar', 'image', 0, 10, nothing)
 
+
 def contour_drawer(image_Bounding_Box, original_image_draw, name):
     contours, hierarchy = cv2.findContours(image=image_Bounding_Box, mode=cv2.RETR_TREE, method=cv2.CHAIN_APPROX_NONE)
     cnt = contours[4]
@@ -129,6 +132,7 @@ def contour_drawer(image_Bounding_Box, original_image_draw, name):
     cv2.drawContours(original_image_draw, [box], 0, (0, 0, 255), 2)
 
     cv2.imshow(name, original_image_draw)
+
 
 def box_circle_drawer(image_Bounding_Box, original_image_draw, name):
     contours, hierarchy = cv2.findContours(image=image_Bounding_Box, mode=cv2.RETR_TREE,
@@ -163,19 +167,21 @@ def box_circle_drawer(image_Bounding_Box, original_image_draw, name):
 
     cv2.imshow('Photos/output3.jpg', original_image_draw2)
 
+
 trackbars()
 
 # reading all pictures
-for filename in glob.glob('C:\\Users\\Julius\\OneDrive - Stichting Hogeschool Utrecht\\School\\Derde jaar\\Beeldherkenning\\Images\\Test Samples\\top-Test-Set\\*.png'):
+for filename in glob.glob(
+        './Test Samples/top-Test-Set/*.png'):
     # read pic into variable
     image = cv2.imread(filename)
 
-    #scale image
+    # scale image
     image = Scaling(image)
 
     # Make backup of pic
-    original_image=image.copy() 
-    
+    original_image = image.copy()
+
     # Copying image to make it gray
     gray_image = image.copy()
 
@@ -195,8 +201,8 @@ for filename in glob.glob('C:\\Users\\Julius\\OneDrive - Stichting Hogeschool Ut
     static_windows()
 
     # activate main program loop.
-    while(True):
-        
+    while (True):
+
         # for button pressing and changing
         k = cv2.waitKey(1) & 0xFF
         if k == 27:
@@ -219,30 +225,37 @@ for filename in glob.glob('C:\\Users\\Julius\\OneDrive - Stichting Hogeschool Ut
 
         ###################################################################
         # apply binary thresholding
-        #binary_gray = Binary_conversion(gray_image, "binary_gray")
-        #binary_HSV_S = Binary_conversion(image_HSV_S, "binary_HSV_S")
-        #binary_HSV = Binary_conversion(image_HSV, "binary_HSV")
+        # binary_gray = Binary_conversion(gray_image, "binary_gray")
+        # binary_HSV_S = Binary_conversion(image_HSV_S, "binary_HSV_S")
+        # binary_HSV = Binary_conversion(image_HSV, "binary_HSV")
         #############################################################
 
         # Using Canny to make edges
         edges_gray = cv2.Canny(gray_image, Min, Max)
-        edge_image_HSV_S = cv2.Canny(image_HSV_S, Min, Max)
-        edge_image_HSV = cv2.Canny(image_HSV, Min, Max)
-        edge_image_RGB = cv2.Canny(image_RGB, Min, Max)
+        #edge_image_HSV_S = cv2.Canny(image_HSV_S, Min, Max)
+        #edge_image_HSV = cv2.Canny(image_HSV, Min, Max)
+        #edge_image_RGB = cv2.Canny(image_RGB, Min, Max)
 
+        # Show the edge images
+        cv2.imshow("Edges", edges_gray)
+        #cv2.imshow("edge_HSV_S", edge_image_HSV_S)
+        #cv2.imshow("edge_HSV", edge_image_HSV)
+        #cv2.imshow("edge_RGB", edge_image_RGB)
+
+        # Erode and Dialte the edge image.
         edges_gray_erosion, edges_gray_dialation = erosion_dilation(edges_gray, kernel_1, kernel_2, iterations_trackbar)
 
+        # Use Eroded image as mask.
         mask = edges_gray_erosion
+
+        # make a copy of the original image to put the mask on
         original_image_masked = image.copy()
 
+        # put mask on image
         masked = cv2.bitwise_and(original_image_masked, original_image_masked, mask=mask)
 
+        # show masked image
         cv2.imshow("masked", masked)
-
-        cv2.imshow("Edges", edges_gray)
-        cv2.imshow("edge_HSV_S", edge_image_HSV_S)
-        cv2.imshow("edge_HSV", edge_image_HSV)
-        cv2.imshow("edge_RGB", edge_image_RGB)
 
         # zet in verslag: Contouren getest op pre processed images, resultaat was niet bruikbaar.
         # image_contour_create(binary_gray, gray_image, "gray_image")
@@ -250,20 +263,39 @@ for filename in glob.glob('C:\\Users\\Julius\\OneDrive - Stichting Hogeschool Ut
         # image_contour_create(binary_HSV, image_HSV, "image_HSV")
 
         image_contour_create(edges_gray, gray_image, "Contours Gray Image")
-        image_contour_create(edge_image_HSV_S, image_HSV_S, "Contours HSV S Image")
-        image_contour_create(edge_image_HSV, image_HSV, "Contours HSV Image")
-        image_contour_create(edge_image_RGB, image_RGB, "Contours RGB Image")
 
-        ########################################
-        image_Bounding_Box = image_contour_create(edges_gray, gray_image, None)
-        original_image_draw = original_image.copy()
-        contour_drawer(image_Bounding_Box, original_image_draw, "contour_original_image")
+        # copy gray image
+        gray_copy = gray_image.copy()
 
-        ###############################################################
-        original_image_draw2 = original_image.copy()
-        box_circle_drawer(image_Bounding_Box, original_image_draw, 'Photos/output3.jpg')
+        # blur gray image
+        blur = cv2.GaussianBlur(gray_copy, (5, 5), 0)
+        blur2 = cv2.GaussianBlur(gray_copy, (11, 11), 0)
+        blur3 = cv2.GaussianBlur(gray_copy, (21, 21), 0)
 
-        ###############################################################
+        cv2.imshow("blur", blur)
+        cv2.imshow("blur2", blur2)
+        cv2.imshow("blur3", blur3)
+
+
+        image_contour_create(blur, gray_image, "Blur contour Image")
+        image_contour_create(blur2, gray_image, "Blur contour Image2")
+        image_contour_create(blur3, gray_image, "Blur contour Image3")
+
+        #image_contour_create(edge_image_HSV_S, image_HSV_S, "Contours HSV S Image")
+        #image_contour_create(edge_image_HSV, image_HSV, "Contours HSV Image")
+        #image_contour_create(edge_image_RGB, image_RGB, "Contours RGB Image")
+
+        # ###############################################################
+        # image_Bounding_Box = image_contour_create(edges_gray, gray_image, None)
+        # original_image_draw = original_image.copy()
+        # contour_drawer(image_Bounding_Box, original_image_draw, "contour_original_image")
+        #
+        # ###############################################################
+        # original_image_draw2 = original_image.copy()
+        # box_circle_drawer(image_Bounding_Box, original_image_draw, 'Photos/output3.jpg')
+        # ###############################################################
+
+
         # maak een circle binnen het vierkant wat getekend wordt.
         # maak het vierkant kunnen draaien.
         # houghcricles()
@@ -278,7 +310,4 @@ for filename in glob.glob('C:\\Users\\Julius\\OneDrive - Stichting Hogeschool Ut
 
         # hough lines voor de prins en de stroopwafel koekjes
 
-
-
 cv2.destroyAllWindows()
-
