@@ -43,9 +43,9 @@ def static_windows():
     # HSV - V
     cv2.imshow('V-HSV', image_HSV[:, :, 2])
     # HSV
-    cv2.imshow("HSV", image_HSV)    # Good
+    cv2.imshow("RGB 0-255 > HSV 0-179", image_HSV)    # Good
     # RGB
-    cv2.imshow("RGB", image_RGB)    # Good
+    cv2.imshow("RGB - Blue Red channel swap", image_RGB)    # Good
     # Original image
     cv2.imshow("original_image", original_image)
     # Grayscaled image
@@ -86,12 +86,17 @@ def erosion_dilation(img, kernel_1, kernel_2, iterations_trackbar):
     img_dilation = cv2.dilate(img, kernel, iterations=iterations_trackbar)
     img_erosion = cv2.erode(img_dilation, kernel, iterations=iterations_trackbar)
 
+    edges_gray_erosion_dialation = np.hstack((img_erosion, img_dilation))
+
+    cv2.imshow("edges_gray_erosion_dialation", edges_gray_erosion_dialation)
+
     return img_erosion, img_dilation
 
 
 def trackbars():
     img = np.zeros((300, 512, 3), np.uint8)
     cv2.namedWindow('image')
+    cv2.resizeWindow('image', 700, 400)
 
     # creating trackbars for Min value
     cv2.createTrackbar('Min', 'image', 0, 400, nothing)
@@ -161,7 +166,7 @@ def box_circle_drawer(image_Bounding_Box, original_image_draw, name):
 trackbars()
 
 # reading all pictures
-for filename in glob.glob('D:\\OneDrive - Stichting Hogeschool Utrecht\\School\\Derde jaar\\Beeldherkenning\\Images\\Test Samples\\top-Test-Set\\*.png'):
+for filename in glob.glob('C:\\Users\\Julius\\OneDrive - Stichting Hogeschool Utrecht\\School\\Derde jaar\\Beeldherkenning\\Images\\Test Samples\\top-Test-Set\\*.png'):
     # read pic into variable
     image = cv2.imread(filename)
 
@@ -226,12 +231,11 @@ for filename in glob.glob('D:\\OneDrive - Stichting Hogeschool Utrecht\\School\\
         edge_image_RGB = cv2.Canny(image_RGB, Min, Max)
 
         edges_gray_erosion, edges_gray_dialation = erosion_dilation(edges_gray, kernel_1, kernel_2, iterations_trackbar)
-        edges_gray_erosion_dialation = np.hstack((edges_gray_erosion, edges_gray_dialation))
-        cv2.imshow("edges_gray_erosion_dialation", edges_gray_erosion_dialation)
 
         mask = edges_gray_erosion
+        original_image_masked = image.copy()
 
-        masked = cv2.bitwise_and(gray_image, gray_image, mask=mask)
+        masked = cv2.bitwise_and(original_image_masked, original_image_masked, mask=mask)
 
         cv2.imshow("masked", masked)
 
