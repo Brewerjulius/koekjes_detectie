@@ -225,9 +225,7 @@ for filename in glob.glob(
 
         ###################################################################
         # apply binary thresholding
-        # binary_gray = Binary_conversion(gray_image, "binary_gray")
-        # binary_HSV_S = Binary_conversion(image_HSV_S, "binary_HSV_S")
-        # binary_HSV = Binary_conversion(image_HSV, "binary_HSV")
+        binary_HSV_S = binary_conversion(image_HSV_S, "binary_HSV_S")
         #############################################################
 
         # Using Canny to make edges
@@ -256,11 +254,6 @@ for filename in glob.glob(
 
         # show masked image
         cv2.imshow("masked", masked)
-
-        # zet in verslag: Contouren getest op pre processed images, resultaat was niet bruikbaar.
-        # image_contour_create(binary_gray, gray_image, "gray_image")
-        # image_contour_create(binary_HSV_S, image_HSV_S, "image_HSV_S")
-        # image_contour_create(binary_HSV, image_HSV, "image_HSV")
 
         image_contour_create(edges_gray, gray_image, "Contours Gray Image")
 
@@ -295,19 +288,5 @@ for filename in glob.glob(
         # box_circle_drawer(image_Bounding_Box, original_image_draw, 'Photos/output3.jpg')
         # ###############################################################
 
-
-        # maak een circle binnen het vierkant wat getekend wordt.
-        # maak het vierkant kunnen draaien.
-        # houghcricles()
-
-        # pixels van de contour optellen om ruigheid van surface te detecteren.
-
-        # LBP
-
-        # difference in gausian
-
-        # roteer fotos om het kleinst mogelijke vierkant te krijgen - voor de prins koek vooral
-
-        # hough lines voor de prins en de stroopwafel koekjes
 
 cv2.destroyAllWindows()
