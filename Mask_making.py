@@ -1,7 +1,7 @@
 import cv2
 import glob
 import numpy as np
-import cv2 as cv
+
 from matplotlib import pyplot as plt
 
 # Load image, grayscale, Gaussian blur, Otsu's threshold, dilate
@@ -35,7 +35,7 @@ for filename in glob.glob(
     img = original.copy()
     color = ('b', 'g', 'r')
     for i, col in enumerate(color):
-        histr = cv.calcHist([img], [i], None, [256], [0, 256])
+        histr = cv2.calcHist([img], [i], None, [256], [0, 256])
         plt.plot(histr, color=col)
         plt.xlim([0, 256])
     plt.show()
