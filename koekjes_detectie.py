@@ -135,6 +135,9 @@ def contour_drawer(image_Bounding_Box, original_image_draw, name):
 
 
 def box_circle_drawer(image_Bounding_Box, original_image_draw, name):
+    original_image_draw3 = original_image_draw2.copy()
+    original_image_draw4 = original_image_draw2.copy()
+
     contours, hierarchy = cv2.findContours(image=image_Bounding_Box, mode=cv2.RETR_TREE,
                                            method=cv2.CHAIN_APPROX_NONE)
     areaArray = []
@@ -153,7 +156,9 @@ def box_circle_drawer(image_Bounding_Box, original_image_draw, name):
     # draw it
     x, y, w, h = cv2.boundingRect(secondlargestcontour)
     cv2.drawContours(original_image_draw2, secondlargestcontour, -1, (255, 0, 0), 2)
-    cv2.rectangle(original_image_draw2, (x, y), (x + w, y + h), (0, 255, 0), 2)
+    cv2.rectangle(original_image_draw3, (x, y), (x + w, y + h), (0, 255, 0), 2)
+
+
 
     Circle_x = int((x + x + w) / 2)
     Circle_y = int((y + y + h) / 2)
@@ -163,9 +168,11 @@ def box_circle_drawer(image_Bounding_Box, original_image_draw, name):
     elif x > Circle_x:
         Radius = x - Circle_x
 
-    cv2.circle(original_image_draw2, (Circle_x, Circle_y), Radius, (0, 0, 255), -1)
+    cv2.circle(original_image_draw4, (Circle_x, Circle_y), Radius, (0, 0, 255), -1)
 
-    cv2.imshow('Photos/output3.jpg', original_image_draw2)
+    combined_image = cv2.bitwise_and(original_image_draw2, original_image_draw3, mask=None)
+    combined_image = cv2.bitwise_and(combined_image, original_image_draw4, mask=None)
+    cv2.imshow('Photos/output3.jpg', combined_image)
 
 
 trackbars()
@@ -279,13 +286,13 @@ for filename in glob.glob(
         #image_contour_create(edge_image_RGB, image_RGB, "Contours RGB Image")
 
         # ###############################################################
-        # image_Bounding_Box = image_contour_create(edges_gray, gray_image, None)
-        # original_image_draw = original_image.copy()
-        # contour_drawer(image_Bounding_Box, original_image_draw, "contour_original_image")
+        image_Bounding_Box = image_contour_create(edges_gray, gray_image, None)
+        original_image_draw = original_image.copy()
+        contour_drawer(image_Bounding_Box, original_image_draw, "contour_original_image")
         #
         # ###############################################################
-        # original_image_draw2 = original_image.copy()
-        # box_circle_drawer(image_Bounding_Box, original_image_draw, 'Photos/output3.jpg')
+        original_image_draw2 = original_image.copy()
+        box_circle_drawer(image_Bounding_Box, original_image_draw, 'Photos/output3.jpg')
         # ###############################################################
 
 
