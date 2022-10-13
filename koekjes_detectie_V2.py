@@ -11,7 +11,7 @@ import cv2
 import glob
 import copy
 import numpy as np
-# from matplotlib import pyplot as plt
+from matplotlib import pyplot as plt
 import time
 
 
@@ -77,17 +77,45 @@ def erosion_dilation(img, kernel_1, kernel_2, iterations_trackbar):
 
     return img_erosion, img_dilation
 
+def pixel_counter(image):
+    number_of_white_pix = np.sum(image == 255)
+    number_of_black_pix = np.sum(image == 0)
+
+    print('Number of white pixels:', number_of_white_pix)
+    print('Number of black pixels:', number_of_black_pix)
+
+
+def histogram_rgb_plot(image, mask):
+    color = ('b', 'g', 'r')
+    for i, col in enumerate(color):
+        histr = cv2.calcHist([image], [i], mask, [256], [0, 256])
+        plt.plot(histr, color=col)
+        plt.xlim([0, 256])
+    plt.show()
+
+
+def histogram_rgb_max_value(image, mask):
+    color = ('b')
+    for i, col in enumerate(color):
+        histr_b = cv2.calcHist([image], [i], mask, [256], [0, 256])
+    histr_b_max = max(histr_b)
+
+    color = ('g')
+    for i, col in enumerate(color):
+        histr_g = cv2.calcHist([image], [i], mask, [256], [0, 256])
+    histr_g_max = max(histr_g)
+
+    color = ('r')
+    for i, col in enumerate(color):
+        histr_r = cv2.calcHist([image], [i], mask, [256], [0, 256])
+    histr_r_max = max(histr_r)
+
+    return histr_b_max, histr_g_max, histr_r_max
 
 def trackbars():
     img = np.zeros((300, 512, 3), np.uint8)
     cv2.namedWindow('image')
     cv2.resizeWindow('image', 700, 400)
-
-    # creating trackbars for Min value
-    cv2.createTrackbar('Min', 'image', 0, 400, nothing)
-
-    # creating trackbars for Max value
-    cv2.createTrackbar('Max', 'image', 0, 400, nothing)
 
     # creating trackbar for closing program.
     cv2.createTrackbar('Close Program', 'image', 0, 1, nothing)
@@ -104,6 +132,8 @@ def trackbars():
     # creating trackbar for iterations_trackbar
     cv2.createTrackbar('iterations_trackbar', 'image', 0, 10, nothing)
 
+    # creating trackbar for iterations_trackbar
+    cv2.createTrackbar('refresh_identification', 'image', 0, 1, nothing)
 
 
 trackbars()
@@ -119,6 +149,9 @@ for filename in glob.glob(
 
     # Make backup of pic
     original_image = image.copy()
+
+    # cycle counter reset
+    cycle_counter = 0
 
     # making gray_image gray
     # gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY) - OUD, zet in verslag
@@ -149,6 +182,8 @@ for filename in glob.glob(
         kernel_1 = cv2.getTrackbarPos('kernel_1', 'image')
         kernel_2 = cv2.getTrackbarPos('kernel_2', 'image')
         iterations_trackbar = cv2.getTrackbarPos('iterations_trackbar', 'image')
+        refresh_identification = cv2.getTrackbarPos('refresh_identification', 'image')
+
 
         if Close_Program == 1:
             break
@@ -156,10 +191,30 @@ for filename in glob.glob(
             cv2.setTrackbarPos('Next Photo', 'image', 0)
             break
 
-        ###################################################################
         # apply binary thresholding
         binary_HSV_S = binary_conversion(image_HSV_S, "binary_HSV_S")
-        #############################################################
+
+        # making final mask version
+        final_mask, _ = erosion_dilation(binary_HSV_S, kernel_1, kernel_2, iterations_trackbar)
+
+        # copying original image, on this copy the final mask will be applied.
+        original_masked = original_image.copy()
+        # placing mask on image
+        original_masked = cv2.bitwise_and(original_masked, original_masked, mask=final_mask)
+
+        cv2.imshow("original_masked", original_masked)
+
+#########################################################################
+        # Cookie identification from here on!
+#########################################################################
+
+        if cycle_counter == 0:
+            pixel_counter(final_mask)
+
+            histogram_rgb_plot(original_image, final_mask)
+            histogram_rgb_max_value(original_image, final_mask)
+            cycle_counter = 1
+
 
 
 cv2.destroyAllWindows()

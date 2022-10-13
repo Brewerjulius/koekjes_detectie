@@ -32,10 +32,10 @@ for filename in glob.glob(
     cv2.imshow('thresh', thresh)
     cv2.imshow('dilate', dilate)
 
-    cv2.imwrite('image.png', image)
-    cv2.imwrite('blur_programma_2.png', blur)
-    cv2.imwrite('thresh.png', thresh)
-    cv2.imwrite('dilate.png', dilate)
+    # cv2.imwrite('image.png', image)
+    # cv2.imwrite('blur_programma_2.png', blur)
+    # cv2.imwrite('thresh.png', thresh)
+    # cv2.imwrite('dilate.png', dilate)
 
     img = original.copy()
     color = ('b', 'g', 'r')
