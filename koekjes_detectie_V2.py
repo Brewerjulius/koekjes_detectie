@@ -159,7 +159,6 @@ for filename in glob.glob(
         binary_HSV_S = binary_conversion(image_HSV_S, "binary_HSV_S")
         #############################################################
 
-
-
+        erosion_dilation(binary_HSV_S, kernel_1, kernel_2, iterations_trackbar)
 
 cv2.destroyAllWindows()

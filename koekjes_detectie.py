@@ -195,6 +195,7 @@ for filename in glob.glob(
     # making gray_image gray
     # gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY) - OUD, zet in verslag
     gray_image = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
+
     # making new image where Blue and Red channels are swapped. Eigenlijk zie je BGR
     # image_RGB = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
     image_RGB = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
@@ -262,6 +263,7 @@ for filename in glob.glob(
         # show masked image
         cv2.imshow("masked", masked)
 
+
         image_contour_create(edges_gray, gray_image, "Contours Gray Image")
 
         # copy gray image
@@ -275,7 +277,6 @@ for filename in glob.glob(
         cv2.imshow("blur", blur)
         cv2.imshow("blur2", blur2)
         cv2.imshow("blur3", blur3)
-
 
         image_contour_create(blur, gray_image, "Blur contour Image")
         image_contour_create(blur2, gray_image, "Blur contour Image2")
