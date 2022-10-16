@@ -12,6 +12,7 @@ import glob
 import copy
 import numpy as np
 from matplotlib import pyplot as plt
+import math
 import time
 
 
@@ -77,12 +78,15 @@ def erosion_dilation(img, kernel_1, kernel_2, iterations_trackbar):
 
     return img_erosion, img_dilation
 
+
 def pixel_counter(image):
     number_of_white_pix = np.sum(image == 255)
     number_of_black_pix = np.sum(image == 0)
 
-    print('Number of white pixels:', number_of_white_pix)
-    print('Number of black pixels:', number_of_black_pix)
+    #print('Number of white pixels:', number_of_white_pix)
+    #print('Number of black pixels:', number_of_black_pix)
+
+    return number_of_white_pix
 
 
 def histogram_rgb_plot(image, mask):
@@ -97,20 +101,107 @@ def histogram_rgb_plot(image, mask):
 def histogram_rgb_max_value(image, mask):
     color = ('b')
     for i, col in enumerate(color):
-        histr_b = cv2.calcHist([image], [i], mask, [256], [0, 256])
+        histr_b = cv2.calcHist([image], [0], mask, [256], [0, 256])
     histr_b_max = max(histr_b)
 
     color = ('g')
     for i, col in enumerate(color):
-        histr_g = cv2.calcHist([image], [i], mask, [256], [0, 256])
+        histr_g = cv2.calcHist([image], [1], mask, [256], [0, 256])
     histr_g_max = max(histr_g)
 
     color = ('r')
     for i, col in enumerate(color):
-        histr_r = cv2.calcHist([image], [i], mask, [256], [0, 256])
+        histr_r = cv2.calcHist([image], [2], mask, [256], [0, 256])
     histr_r_max = max(histr_r)
 
+    print(histr_b_max, histr_g_max, histr_r_max)
+
     return histr_b_max, histr_g_max, histr_r_max
+
+
+def color_identifier(blue_value, green_value, red_value):
+
+    #print(blue_value, green_value, red_value)
+
+    if blue_value >= 900 and green_value <= 200 and red_value <= 200:
+        koekje = "Kokosmacroon"
+
+        # Kokosmacroon
+        # Blue => Y 900 tussen x 0 en x 25
+        # Red Green < 200
+
+    elif (200 < blue_value < 260) and (200 < green_value < 260) and (200 < red_value < 260):
+        koekje = "Pennywafel Choco kant"
+        # Pennywafel Choco kant
+        # Red Green Blue => 200 && =< 260
+
+    elif (35 < blue_value < 70) and (35 < green_value < 70) and (35 < red_value < 70):
+        koekje = "Pennywafel NIET choco"
+        # Pennywafel NIET choco kant
+        # Red Green Blue => 35 && =< 70
+
+    elif (325 < blue_value < 500) and (0 < green_value < 100) and (0 < red_value < 100):
+        koekje = "Vlinder koekje"
+
+        # Vlinder koekje
+        # Blue => 325 && <= 500
+        # Red Green <= 100
+    elif (500 < blue_value < 800) and (100 < green_value < 300) and (100 < red_value < 300):
+        koekje = "Choco chip"
+        # Choco chip
+        # BLue => 500 && <= 800
+        # Red Green => 100 && <= 300
+    elif (500 < blue_value < 850) and (100 < green_value < 1000) and (100 < red_value < 1000):
+        koekje = "stroopwafel"
+    else:
+        koekje = 404
+
+    if koekje == "Choco chip" or koekje == "stroopwafel":
+        if pixel_counter(chocolate_detector) >= 20:
+            koekje = "Choco chip"
+        else:
+            koekje = "stroopwafel"
+
+    return koekje
+
+
+def main(argv):
+    https: // docs.opencv.org / 3.4 / d9 / db0 / tutorial_hough_lines.html
+
+    dst = cv2.Canny(original_masked, 50, 200, None, 3)
+
+    # Copy edges to the images that will display the results in BGR
+    cdst = cv.cvtColor(dst, cv.COLOR_GRAY2BGR)
+    cdstP = np.copy(cdst)
+
+    lines = cv.HoughLines(dst, 1, np.pi / 180, 150, None, 0, 0)
+
+    if lines is not None:
+        for i in range(0, len(lines)):
+            rho = lines[i][0][0]
+            theta = lines[i][0][1]
+            a = math.cos(theta)
+            b = math.sin(theta)
+            x0 = a * rho
+            y0 = b * rho
+            pt1 = (int(x0 + 1000 * (-b)), int(y0 + 1000 * (a)))
+            pt2 = (int(x0 - 1000 * (-b)), int(y0 - 1000 * (a)))
+            cv.line(cdst, pt1, pt2, (0, 0, 255), 3, cv.LINE_AA)
+
+    linesP = cv.HoughLinesP(dst, 1, np.pi / 180, 50, None, 50, 10)
+
+    if linesP is not None:
+        for i in range(0, len(linesP)):
+            l = linesP[i][0]
+            cv.line(cdstP, (l[0], l[1]), (l[2], l[3]), (0, 0, 255), 3, cv.LINE_AA)
+
+    cv.imshow("Source", src)
+    cv.imshow("Detected Lines (in red) - Standard Hough Line Transform", cdst)
+    cv.imshow("Detected Lines (in red) - Probabilistic Line Transform", cdstP)
+
+    cv.waitKey()
+    return 0
+
 
 def trackbars():
     img = np.zeros((300, 512, 3), np.uint8)
@@ -135,12 +226,14 @@ def trackbars():
     # creating trackbar for iterations_trackbar
     cv2.createTrackbar('refresh_identification', 'image', 0, 1, nothing)
 
+    # creating trackbar for iterations_trackbar
+    cv2.createTrackbar('upper_range', 'image', 0, 255, nothing)
 
 trackbars()
 
 # reading all pictures
 for filename in glob.glob(
-        './Test Samples/top-Test-Set/*.png'):
+        './Test Samples/top-Test-Set/*.*'):
     # read pic into variable
     image = cv2.imread(filename)
 
@@ -183,7 +276,7 @@ for filename in glob.glob(
         kernel_2 = cv2.getTrackbarPos('kernel_2', 'image')
         iterations_trackbar = cv2.getTrackbarPos('iterations_trackbar', 'image')
         refresh_identification = cv2.getTrackbarPos('refresh_identification', 'image')
-
+        upper_range = cv2.getTrackbarPos('upper_range', 'image')
 
         if Close_Program == 1:
             break
@@ -208,11 +301,33 @@ for filename in glob.glob(
         # Cookie identification from here on!
 #########################################################################
 
-        if cycle_counter == 0:
-            pixel_counter(final_mask)
+        lower_red = np.array([10, 10, 10], dtype="uint8")
 
+        upper_red = np.array([69, 69, 69], dtype="uint8")
+
+        chocolate_detector = cv2.inRange(original_masked, lower_red, upper_red)
+
+        cv2.imshow("chocolate_detector", chocolate_detector)
+
+
+        if cycle_counter == 0:
             histogram_rgb_plot(original_image, final_mask)
-            histogram_rgb_max_value(original_image, final_mask)
+            blue_value, green_value, red_value = histogram_rgb_max_value(original_image, final_mask)
+
+            koekje = color_identifier(blue_value, green_value, red_value)
+
+            # Edge detection
+            dst = cv2.Canny(original_masked, 50, 200, None, 3)
+
+            #  Standard Hough Line Transform
+            lines = cv2.HoughLines(dst, 1, np.pi / 180, 150, None, 0, 0)
+
+
+
+
+            ##//todo make it work
+
+            print(koekje)
             cycle_counter = 1
 
 
