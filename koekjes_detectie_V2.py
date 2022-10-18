@@ -16,9 +16,11 @@ import math
 import time
 
 
-def Scaling(image_for_scaling):
+def Scaling(image_for_scaling, scale_percent):
+
     # Scaling setup
-    scale_percent = 30  # percent of original size
+    if scale_percent == None:
+        scale_percent = 30  # percent of original size
     width = int(image.shape[1] * scale_percent / 100)
     height = int(image.shape[0] * scale_percent / 100)
     dim = (width, height)
@@ -165,42 +167,41 @@ def color_identifier(blue_value, green_value, red_value):
     return koekje
 
 
-def main(argv):
-    https: // docs.opencv.org / 3.4 / d9 / db0 / tutorial_hough_lines.html
-
-    dst = cv2.Canny(original_masked, 50, 200, None, 3)
-
-    # Copy edges to the images that will display the results in BGR
-    cdst = cv.cvtColor(dst, cv.COLOR_GRAY2BGR)
-    cdstP = np.copy(cdst)
-
-    lines = cv.HoughLines(dst, 1, np.pi / 180, 150, None, 0, 0)
-
-    if lines is not None:
-        for i in range(0, len(lines)):
-            rho = lines[i][0][0]
-            theta = lines[i][0][1]
-            a = math.cos(theta)
-            b = math.sin(theta)
-            x0 = a * rho
-            y0 = b * rho
-            pt1 = (int(x0 + 1000 * (-b)), int(y0 + 1000 * (a)))
-            pt2 = (int(x0 - 1000 * (-b)), int(y0 - 1000 * (a)))
-            cv.line(cdst, pt1, pt2, (0, 0, 255), 3, cv.LINE_AA)
-
-    linesP = cv.HoughLinesP(dst, 1, np.pi / 180, 50, None, 50, 10)
-
-    if linesP is not None:
-        for i in range(0, len(linesP)):
-            l = linesP[i][0]
-            cv.line(cdstP, (l[0], l[1]), (l[2], l[3]), (0, 0, 255), 3, cv.LINE_AA)
-
-    cv.imshow("Source", src)
-    cv.imshow("Detected Lines (in red) - Standard Hough Line Transform", cdst)
-    cv.imshow("Detected Lines (in red) - Probabilistic Line Transform", cdstP)
-
-    cv.waitKey()
-    return 0
+# #def lines(input_image, lower_canny, upper_canny):
+#     dst = cv2.Canny(input_image, lower_canny, upper_canny, None, 3)
+#
+#     # Copy edges to the images that will display the results in BGR
+#     cdst = cv2.cvtColor(dst, cv2.COLOR_GRAY2BGR)
+#     cdstP = np.copy(cdst)
+#
+#     lines = cv2.HoughLines(dst, 1, np.pi / 180, 150, None, 0, 0)
+#
+#     if lines is not None:
+#         for i in range(0, len(lines)):
+#             rho = lines[i][0][0]
+#             theta = lines[i][0][1]
+#             a = math.cos(theta)
+#             b = math.sin(theta)
+#             x0 = a * rho
+#             y0 = b * rho
+#             pt1 = (int(x0 + 1000 * (-b)), int(y0 + 1000 * (a)))
+#             pt2 = (int(x0 - 1000 * (-b)), int(y0 - 1000 * (a)))
+#             cv2.line(cdst, pt1, pt2, (0, 0, 255), 3, cv2.LINE_AA)
+#
+#     linesP = cv2.HoughLinesP(dst, 1, np.pi / 180, 50, None, 50, 10)
+#
+#     if linesP is not None:
+#         for i in range(0, len(linesP)):
+#             l = linesP[i][0]
+#             cv2.line(cdstP, (l[0], l[1]), (l[2], l[3]), (0, 0, 255), 3, cv2.LINE_AA)
+#
+#         input_image = Scaling(input_image, 50)
+#         cdst = Scaling(cdst, 50)
+#         cdstP = Scaling(cdstP, 50)
+#
+#     cv2.imshow("Source", input_image)
+#     cv2.imshow("Detected Lines (in red) - Standard Hough Line Transform", cdst)
+#     cv2.imshow("Detected Lines (in red) - Probabilistic Line Transform", cdstP)
 
 
 def trackbars():
@@ -224,10 +225,14 @@ def trackbars():
     cv2.createTrackbar('iterations_trackbar', 'image', 0, 10, nothing)
 
     # creating trackbar for iterations_trackbar
-    cv2.createTrackbar('refresh_identification', 'image', 0, 1, nothing)
+    cv2.createTrackbar('lower_canny', 'image', 0, 300, nothing)
+
+    cv2.setTrackbarPos('lower_canny', 'image', 50)
 
     # creating trackbar for iterations_trackbar
-    cv2.createTrackbar('upper_range', 'image', 0, 255, nothing)
+    cv2.createTrackbar('upper_canny', 'image', 0, 300, nothing)
+
+    cv2.setTrackbarPos('upper_canny', 'image', 200)
 
 trackbars()
 
@@ -238,7 +243,7 @@ for filename in glob.glob(
     image = cv2.imread(filename)
 
     # scale image
-    image = Scaling(image)
+    image = Scaling(image, None)
 
     # Make backup of pic
     original_image = image.copy()
@@ -275,8 +280,8 @@ for filename in glob.glob(
         kernel_1 = cv2.getTrackbarPos('kernel_1', 'image')
         kernel_2 = cv2.getTrackbarPos('kernel_2', 'image')
         iterations_trackbar = cv2.getTrackbarPos('iterations_trackbar', 'image')
-        refresh_identification = cv2.getTrackbarPos('refresh_identification', 'image')
-        upper_range = cv2.getTrackbarPos('upper_range', 'image')
+        lower_canny = cv2.getTrackbarPos('lower_canny', 'image')
+        upper_canny = cv2.getTrackbarPos('upper_canny', 'image')
 
         if Close_Program == 1:
             break
@@ -309,21 +314,13 @@ for filename in glob.glob(
 
         cv2.imshow("chocolate_detector", chocolate_detector)
 
+        #lines(original_masked, lower_canny, upper_canny)
 
         if cycle_counter == 0:
             histogram_rgb_plot(original_image, final_mask)
             blue_value, green_value, red_value = histogram_rgb_max_value(original_image, final_mask)
 
             koekje = color_identifier(blue_value, green_value, red_value)
-
-            # Edge detection
-            dst = cv2.Canny(original_masked, 50, 200, None, 3)
-
-            #  Standard Hough Line Transform
-            lines = cv2.HoughLines(dst, 1, np.pi / 180, 150, None, 0, 0)
-
-
-
 
             ##//todo make it work
 
