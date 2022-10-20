@@ -2,8 +2,6 @@
 """
 Created on Wed Sep 14 15:32:50 2022
 
-UPDATE RUDI
-
 @author: Julius Klein
 """
 
@@ -12,8 +10,6 @@ import glob
 import copy
 import numpy as np
 from matplotlib import pyplot as plt
-import math
-import time
 
 
 def Scaling(image_for_scaling, scale_percent):
@@ -132,12 +128,12 @@ def color_identifier(blue_value, green_value, red_value):
         # Blue => Y 900 tussen x 0 en x 25
         # Red Green < 200
 
-    elif (200 < blue_value < 260) and (200 < green_value < 260) and (200 < red_value < 260):
+    elif (200 <= blue_value <= 260) and (200 <= green_value <= 260) and (200 <= red_value <= 260):
         koekje = "Pennywafel Choco kant"
         # Pennywafel Choco kant
         # Red Green Blue => 200 && =< 260
 
-    elif (35 < blue_value < 70) and (35 < green_value < 70) and (35 < red_value < 70):
+    elif (35 < blue_value < 90): #and (35 < green_value < 70) and (35 < red_value < 70):
         koekje = "Pennywafel NIET choco"
         # Pennywafel NIET choco kant
         # Red Green Blue => 35 && =< 70

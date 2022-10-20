@@ -138,6 +138,8 @@ def box_circle_drawer(image_Bounding_Box, original_image_draw, name):
     original_image_draw3 = original_image_draw2.copy()
     original_image_draw4 = original_image_draw2.copy()
 
+    cv2.imshow("image_Bounding_Box", image_Bounding_Box)
+
     contours, hierarchy = cv2.findContours(image=image_Bounding_Box, mode=cv2.RETR_TREE,
                                            method=cv2.CHAIN_APPROX_NONE)
     areaArray = []
