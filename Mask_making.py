@@ -28,9 +28,14 @@ for filename in glob.glob(
         image_number += 1
 
     cv2.imshow('image', image)
+    cv2.imshow('blur', blur)
     cv2.imshow('thresh', thresh)
     cv2.imshow('dilate', dilate)
 
+    # cv2.imwrite('image.png', image)
+    # cv2.imwrite('blur_programma_2.png', blur)
+    # cv2.imwrite('thresh.png', thresh)
+    # cv2.imwrite('dilate.png', dilate)
 
     img = original.copy()
     color = ('b', 'g', 'r')
@@ -39,6 +44,7 @@ for filename in glob.glob(
         plt.plot(histr, color=col)
         plt.xlim([0, 256])
     plt.show()
+
 
 
 

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 Created on Wed Sep 14 15:32:50 2022
+
 @author: Julius Klein
 """
 
@@ -9,7 +10,6 @@ import glob
 import copy
 import numpy as np
 from matplotlib import pyplot as plt
-import imutils
 
 
 def Scaling(image_for_scaling, scale_percent):
@@ -323,14 +323,6 @@ for filename in glob.glob(
             print(koekje)
             cycle_counter = 1
 
-
-
-            rotate_image = imutils.rotate(image, 32)
-            window_name = 'Rotate Image by Angle in Python'
-            cv2.namedWindow(window_name, cv2.WINDOW_NORMAL)
-            cv2.imshow(window_name, rotate_image)
-            cv2.waitKey(0)
-            cv2.destroyAllWindows()
 
 
 cv2.destroyAllWindows()
