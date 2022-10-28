@@ -10,9 +10,10 @@ import glob
 import copy
 import numpy as np
 from matplotlib import pyplot as plt
+import imutils
 
 
-def Scaling(image_for_scaling, scale_percent):
+def scaling(image_for_scaling, scale_percent):
 
     # Scaling setup
     if scale_percent == None:
@@ -163,6 +164,106 @@ def color_identifier(blue_value, green_value, red_value):
     return koekje
 
 
+def rotator(image, rotation_angle):
+    rotate_image = imutils.rotate(image, rotation_angle)
+    cv2.imshow("rotate_image", rotate_image)
+    return rotate_image
+
+
+def box_circle_drawer(input_gray_image, original_image):
+    # make loop counter and set it to 0
+    counter = 0
+    # make variable for storing max difference and set it to 0
+    max_difference = 0
+
+    # loop 360 times (rotating the image 360 degrees)
+    while counter <= 360:
+
+        # rotate gray image
+        input_gray_image_rotated = rotator(input_gray_image, counter)
+        # rotate original image
+        original_image_rotated = rotator(original_image, counter)
+
+        # make edge image of input image
+        edges_gray = cv2.Canny(input_gray_image_rotated, 110, 0)
+
+        # copy input image for later use
+        input_2 = original_image_rotated.copy()
+        input_3 = original_image_rotated.copy()
+        input_4 = original_image_rotated.copy()
+
+        # detect the image_contour_create on the binary/edge image using cv2.CHAIN_APPROX_NONE
+        contours, hierarchy = cv2.findContours(image=edges_gray, mode=cv2.RETR_TREE, method=cv2.CHAIN_APPROX_NONE)
+
+        # copy the gray image so we dont overwrite it
+        image_countours_V1 = input_gray_image_rotated.copy()
+
+        # draw image_contour_create on the copy of original image
+        cv2.drawContours(image=image_countours_V1, contours=contours, contourIdx=-1, color=(0, 255, 0), thickness=2,
+                         lineType=cv2.LINE_AA)
+
+        # find countours of edge image
+        contours, hierarchy = cv2.findContours(image=image_countours_V1, mode=cv2.RETR_TREE, method=cv2.CHAIN_APPROX_NONE)
+
+        areaArray = []
+        count = 1
+
+        for i, c in enumerate(contours):
+            area = cv2.contourArea(c)
+            areaArray.append(area)
+
+        # first sort the array by area
+        sorteddata = sorted(zip(areaArray, contours), key=lambda x: x[0], reverse=True)
+
+        # find the nth largest contour [n-1][1], in this case 2
+        secondlargestcontour = sorteddata[1][1]
+
+        # get the X and Y cordinate, and the width and hight data from the second largest contour
+        x, y, w, h = cv2.boundingRect(secondlargestcontour)
+        # draw countours
+        cv2.drawContours(input_2, secondlargestcontour, -1, (255, 0, 0), 2)
+        # draw rectangle
+        cv2.rectangle(input_3, (x, y), (x + w, y + h), (0, 255, 0), 2)
+
+        #find middle point of X axis. (X bottom + (X bottom + width) divided by 2 to find the middel
+        Circle_x = int((x + x + w) / 2)
+        # find middle point of Y axis (Y bottom + (Y bottom + hight) divided by 2 to find the middel
+        Circle_y = int((y + y + h) / 2)
+
+
+        if Circle_x > x:
+            Radius = Circle_x - x
+        elif x > Circle_x:
+            Radius = x - Circle_x
+
+        cv2.circle(input_4, (Circle_x, Circle_y), Radius, (0, 0, 255), -1)
+
+        combined_image = cv2.bitwise_and(input_2, input_3, mask=None)
+        combined_image = cv2.bitwise_and(combined_image, input_4, mask=None)
+
+        # Loop counter + 1
+        counter = counter + 1
+
+        # find the bigger variable
+        if w > h:
+            difference = (w-h)
+        elif h > w:
+            difference = (h-w)
+        else:
+            difference = 0
+
+        # compare current difference with max found difference
+        if difference >= max_difference:
+            # set new max difference if current difference is higher
+            max_difference = difference
+
+    # show combined image
+    cv2.imshow('Photos/output3.jpg', combined_image)
+    print(max_difference)
+
+    return max_difference
+
+
 # #def lines(input_image, lower_canny, upper_canny):
 #     dst = cv2.Canny(input_image, lower_canny, upper_canny, None, 3)
 #
@@ -239,7 +340,7 @@ for filename in glob.glob(
     image = cv2.imread(filename)
 
     # scale image
-    image = Scaling(image, None)
+    image = scaling(image, None)
 
     # Make backup of pic
     original_image = image.copy()
@@ -322,6 +423,8 @@ for filename in glob.glob(
 
             print(koekje)
             cycle_counter = 1
+
+            box_circle_drawer(gray_image, image)
 
 
 cv2.destroyAllWindows()
