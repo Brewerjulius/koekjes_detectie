@@ -324,5 +324,4 @@ for filename in glob.glob(
             cycle_counter = 1
 
 
-
 cv2.destroyAllWindows()
