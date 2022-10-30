@@ -120,10 +120,18 @@ def histogram_rgb_max_value(image, mask):
 
 def color_identifier(blue_value, green_value, red_value):
 
-    #print(blue_value, green_value, red_value)
+    # kokosmacroon = 1
+    # Pennywafel Choco = 2
+    # Penny wafel Niet choco = 3
+    # Vlinder koekje = 4
+    # choco chip = 5
+    # stroopwafel = 6
+
+    output_number_color = 0
 
     if blue_value >= 900 and green_value <= 200 and red_value <= 200:
         koekje = "Kokosmacroon"
+        output_number_color = 1
 
         # Kokosmacroon
         # Blue => Y 900 tussen x 0 en x 25
@@ -131,37 +139,47 @@ def color_identifier(blue_value, green_value, red_value):
 
     elif (200 <= blue_value <= 260) and (200 <= green_value <= 260) and (200 <= red_value <= 260):
         koekje = "Pennywafel Choco kant"
+        output_number_color = 2
         # Pennywafel Choco kant
         # Red Green Blue => 200 && =< 260
 
     elif (35 < blue_value < 90): #and (35 < green_value < 70) and (35 < red_value < 70):
         koekje = "Pennywafel NIET choco"
+        output_number_color = 3
         # Pennywafel NIET choco kant
         # Red Green Blue => 35 && =< 70
 
     elif (325 < blue_value < 500) and (0 < green_value < 100) and (0 < red_value < 100):
         koekje = "Vlinder koekje"
+        output_number_color = 4
 
         # Vlinder koekje
         # Blue => 325 && <= 500
         # Red Green <= 100
     elif (500 < blue_value < 800) and (100 < green_value < 300) and (100 < red_value < 300):
         koekje = "Choco chip"
+        output_number_color = 5
         # Choco chip
         # BLue => 500 && <= 800
         # Red Green => 100 && <= 300
     elif (500 < blue_value < 850) and (100 < green_value < 1000) and (100 < red_value < 1000):
         koekje = "stroopwafel"
+        output_number_color = 6
     else:
         koekje = 404
+        output_number_color = 404
 
     if koekje == "Choco chip" or koekje == "stroopwafel":
         if pixel_counter(chocolate_detector) >= 20:
             koekje = "Choco chip"
+            output_number_color = 5
         else:
             koekje = "stroopwafel"
+            output_number_color = 6
 
-    return koekje
+
+    print("output_number_color:", output_number_color, koekje)
+    return output_number_color
 
 
 def rotator(image, rotation_angle):
@@ -259,10 +277,70 @@ def box_circle_drawer(input_gray_image, original_image):
 
     # show combined image
     cv2.imshow('Photos/output3.jpg', combined_image)
-    print(max_difference)
+    #print(max_difference)
 
-    return max_difference
+    if max_difference > 50:
+        # if cookie is rectangle
+        output_number_shape = 1
+    else:
+        # cookie is square
+        output_number_shape = 0
 
+    print("output_number_shape:", output_number_shape)
+    return output_number_shape
+
+def contrast(contrast_image):
+ # convert to LAB color space
+            contrast_image = cv2.cvtColor(image_copy_contrast, cv2.COLOR_BGR2LAB)
+
+            # separate channels
+            V, A, B = cv2.split(contrast_image)
+
+            # compute minimum and maximum in 5x5 region using erode and dilate
+            kernel_contrast = np.ones((5, 5), np.uint8)
+            v_min = cv2.erode(V, kernel_contrast, iterations=1)
+            v_max = cv2.dilate(V, kernel_contrast, iterations=1)
+
+            # convert min and max to floats
+            v_min = v_min.astype(np.float64)
+            v_max = v_max.astype(np.float64)
+
+            # compute local contrast
+            contrast = (v_max - v_min) / (v_max + v_min)
+
+            # get average across whole image
+            average_contrast = 100 * np.mean(contrast)
+
+            print("average_contrast:", str(average_contrast) + "%")
+
+            return average_contrast
+
+def cookie_identifier(color, shape, contrast):
+
+    if color == 1 and shape == 0 and (6.5 <= contrast <= 7.5):
+        # Kokosmacroon
+        variable_x = "Kokosmacroon"
+
+    elif color == 2 and shape == 1 and (4 <= contrast < 4.2):
+        # Pennywafel Choco kant
+        variable_x = "Pennywafel Choco kant"
+
+    elif color == 3 and shape == 1 and (3.6 <= contrast <= 3.9):
+        variable_x = "Pennywafel NIET choco"
+
+    elif color == 4 and shape == 0 and (2.8 <= contrast <= 3.2):
+        variable_x = "Vlinder koekje"
+
+    elif color == 5 and shape == 0 and (4.2 <= contrast <= 4.4):
+        variable_x = "Choco chip"
+
+    elif color == 6 and shape == 0 and (5.5 <= contrast <= 5.7):
+        variable_x = "stroopwafel"
+
+    else:
+        variable_x = 404
+
+    print("koekje is: ", variable_x)
 
 # #def lines(input_image, lower_canny, upper_canny):
 #     dst = cv2.Canny(input_image, lower_canny, upper_canny, None, 3)
@@ -414,17 +492,21 @@ for filename in glob.glob(
         #lines(original_masked, lower_canny, upper_canny)
 
         if cycle_counter == 0:
-            histogram_rgb_plot(original_image, final_mask)
-            blue_value, green_value, red_value = histogram_rgb_max_value(original_image, final_mask)
-
-            koekje = color_identifier(blue_value, green_value, red_value)
-
-            ##//todo make it work
-
-            print(koekje)
             cycle_counter = 1
 
-            box_circle_drawer(gray_image, image)
+            histogram_rgb_plot(original_image, final_mask)
 
+            blue_value, green_value, red_value = histogram_rgb_max_value(original_image, final_mask)
+
+            cookie_color = color_identifier(blue_value, green_value, red_value)
+
+            box_circle_output = box_circle_drawer(gray_image, image)
+
+            image_copy_contrast = image.copy()
+            contrast_value = contrast(image_copy_contrast)
+
+            cookie_identifier(cookie_color, box_circle_output, contrast_value)
+
+        cv2.setTrackbarPos('Next Photo', 'image', 1)
 
 cv2.destroyAllWindows()
