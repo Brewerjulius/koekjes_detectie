@@ -156,7 +156,7 @@ def color_identifier(blue_value, green_value, red_value):
         # Vlinder koekje
         # Blue => 325 && <= 500
         # Red Green <= 100
-    elif (500 < blue_value < 800) and (100 < green_value < 300) and (100 < red_value < 300):
+    elif (500 < blue_value < 800) and (50 < green_value < 300) and (50 < red_value < 300):
         koekje = "Choco chip"
         output_number_color = 5
         # Choco chip
@@ -291,56 +291,98 @@ def box_circle_drawer(input_gray_image, original_image):
 
 def contrast(contrast_image):
  # convert to LAB color space
-            contrast_image = cv2.cvtColor(image_copy_contrast, cv2.COLOR_BGR2LAB)
+    contrast_image = cv2.cvtColor(image_copy_contrast, cv2.COLOR_BGR2LAB)
 
-            # separate channels
-            V, A, B = cv2.split(contrast_image)
+    # separate channels
+    V, A, B = cv2.split(contrast_image)
 
-            # compute minimum and maximum in 5x5 region using erode and dilate
-            kernel_contrast = np.ones((5, 5), np.uint8)
-            v_min = cv2.erode(V, kernel_contrast, iterations=1)
-            v_max = cv2.dilate(V, kernel_contrast, iterations=1)
+    # compute minimum and maximum in 5x5 region using erode and dilate
+    kernel_contrast = np.ones((5, 5), np.uint8)
+    v_min = cv2.erode(V, kernel_contrast, iterations=1)
+    v_max = cv2.dilate(V, kernel_contrast, iterations=1)
 
-            # convert min and max to floats
-            v_min = v_min.astype(np.float64)
-            v_max = v_max.astype(np.float64)
+    # convert min and max to floats
+    v_min = v_min.astype(np.float64)
+    v_max = v_max.astype(np.float64)
 
-            # compute local contrast
-            contrast = (v_max - v_min) / (v_max + v_min)
+    # compute local contrast
+    contrast_variable = (v_max - v_min) / (v_max + v_min)
 
-            # get average across whole image
-            average_contrast = 100 * np.mean(contrast)
+    # get average across whole image
+    average_contrast = 100 * np.mean(contrast_variable)
 
-            print("average_contrast:", str(average_contrast) + "%")
+    print("average_contrast:", str(average_contrast) + "%")
 
-            return average_contrast
+    if 6.5 <= average_contrast <= 7.5:
+        # Kokosmacroon
+        check_number_contrast = 1
+
+    elif 4 <= average_contrast < 4.2:
+        # Pennywafel Choco kant
+        check_number_contrast = 2
+
+    elif 3.6 <= average_contrast <= 3.9:
+        # Pennywafel NIET choco
+        check_number_contrast = 3
+
+    elif 2.8 <= average_contrast <= 3.2:
+        # Vlinder koekje
+        check_number_contrast = 4
+
+    elif 4.2 <= average_contrast <= 4.4:
+        # Choco chip
+        check_number_contrast = 5
+
+    elif 5.5 <= average_contrast <= 5.7:
+        # stroopwafel
+        check_number_contrast = 6
+
+    else:
+        check_number_contrast = 404
+
+    print("output_number_contrast:", check_number_contrast, average_contrast)
+    return check_number_contrast
 
 def cookie_identifier(color, shape, contrast):
 
-    if color == 1 and shape == 0 and (6.5 <= contrast <= 7.5):
+    check_number = 0
+
+    if color == 1 and shape == 0 and contrast == 1:
         # Kokosmacroon
-        variable_x = "Kokosmacroon"
+        koekje_identified = "Kokosmacroon"
+        check_number = 1
 
-    elif color == 2 and shape == 1 and (4 <= contrast < 4.2):
+    elif color == 2 and shape == 1 and contrast == 2:
         # Pennywafel Choco kant
-        variable_x = "Pennywafel Choco kant"
+        koekje_identified = "Pennywafel Choco kant"
+        check_number = 2
 
-    elif color == 3 and shape == 1 and (3.6 <= contrast <= 3.9):
-        variable_x = "Pennywafel NIET choco"
+    elif color == 3 and shape == 1 and contrast == 3:
+        # Pennywafel NIET choco
+        koekje_identified = "Pennywafel NIET choco"
+        check_number = 3
 
-    elif color == 4 and shape == 0 and (2.8 <= contrast <= 3.2):
-        variable_x = "Vlinder koekje"
+    elif color == 4 and shape == 0 and contrast == 4:
+        # Vlinder koekje
+        koekje_identified = "Vlinder koekje"
+        check_number = 4
 
-    elif color == 5 and shape == 0 and (4.2 <= contrast <= 4.4):
-        variable_x = "Choco chip"
+    elif color == 5 and shape == 0 and contrast == 5:
+        # Choco chip
+        koekje_identified = "Choco chip"
+        check_number = 5
 
-    elif color == 6 and shape == 0 and (5.5 <= contrast <= 5.7):
-        variable_x = "stroopwafel"
+    elif color == 6 and shape == 0 and contrast == 6:
+        # stroopwafel
+        koekje_identified = "stroopwafel"
+        check_number = 6
 
     else:
-        variable_x = 404
+        koekje_identified = 404
 
-    print("koekje is: ", variable_x)
+    print("koekje is: ", koekje_identified)
+
+    return check_number
 
 # #def lines(input_image, lower_canny, upper_canny):
 #     dst = cv2.Canny(input_image, lower_canny, upper_canny, None, 3)
@@ -378,6 +420,38 @@ def cookie_identifier(color, shape, contrast):
 #     cv2.imshow("Detected Lines (in red) - Standard Hough Line Transform", cdst)
 #     cv2.imshow("Detected Lines (in red) - Probabilistic Line Transform", cdstP)
 
+def koekje_name_finder(koekje_name):
+
+    koekje_name = filename.partition("_")
+
+    koekje_name = koekje_name[0]
+
+    koekje_name = koekje_name[6:]
+
+    if koekje_name == "kokosmacroon":
+        koekje_verification_number = 1
+
+    elif koekje_name == "pennywafel-choco":
+        koekje_verification_number = 2
+
+    elif koekje_name == "pennywafel-niet-choco":
+        koekje_verification_number = 3
+
+    elif koekje_name == "vlinderkoekje":
+        koekje_verification_number = 4
+
+    elif koekje_name == "chocolate-chip-b" or koekje_name == "chocolate-chip-t":
+        koekje_verification_number = 5
+
+    elif koekje_name == "stroopwafel":
+        koekje_verification_number = 6
+
+    else:
+        koekje_verification_number = 405
+
+    print(koekje_name)
+
+    return koekje_verification_number
 
 def trackbars():
     img = np.zeros((300, 512, 3), np.uint8)
@@ -411,11 +485,16 @@ def trackbars():
 
 trackbars()
 
+with open('log.txt', 'a') as f:
+        f.write('XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n')
+
 # reading all pictures
 for filename in glob.glob(
-        './Test Samples/top-Test-Set/*.*'):
+        './top/*.*'):
     # read pic into variable
     image = cv2.imread(filename)
+
+    koekje_verification = koekje_name_finder(filename)
 
     # scale image
     image = scaling(image, None)
@@ -505,7 +584,15 @@ for filename in glob.glob(
             image_copy_contrast = image.copy()
             contrast_value = contrast(image_copy_contrast)
 
-            cookie_identifier(cookie_color, box_circle_output, contrast_value)
+            identifier_check = cookie_identifier(cookie_color, box_circle_output, contrast_value)
+
+            with open('log.txt', 'a') as f:
+                if identifier_check == koekje_verification:
+                    f.write('success\n')
+                elif identifier_check == 404:
+                    f.write('error\n')
+                else:
+                    f.write('fail;' + str(cookie_color) + ";" + str(box_circle_output) + ";" + str(contrast_value) + ";" + str(identifier_check) + ";" + str(koekje_verification) + '\n')
 
         cv2.setTrackbarPos('Next Photo', 'image', 1)
 
