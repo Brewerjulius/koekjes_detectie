@@ -7,11 +7,9 @@ Created on Wed Sep 14 15:32:50 2022
 
 import cv2
 import glob
-import copy
 import numpy as np
 from matplotlib import pyplot as plt
 import imutils
-
 
 def scaling(image_for_scaling, scale_percent):
 
@@ -294,19 +292,26 @@ def contrast(contrast_image):
     contrast_image = cv2.cvtColor(image_copy_contrast, cv2.COLOR_BGR2LAB)
 
     # separate channels
-    V, A, B = cv2.split(contrast_image)
+    L, A, B = cv2.split(contrast_image)
 
     # compute minimum and maximum in 5x5 region using erode and dilate
     kernel_contrast = np.ones((5, 5), np.uint8)
-    v_min = cv2.erode(V, kernel_contrast, iterations=1)
-    v_max = cv2.dilate(V, kernel_contrast, iterations=1)
+    l_min = cv2.erode(L, kernel_contrast, iterations=1)
+    l_max = cv2.dilate(L, kernel_contrast, iterations=1)
+
+    cv2.imshow("L", L)
+    cv2.imshow("l_min", l_min)
+    cv2.imshow("l_max", l_max)
+
+    plt.hist(L.ravel(), 256, [0, 256]);
+    plt.show()
 
     # convert min and max to floats
-    v_min = v_min.astype(np.float64)
-    v_max = v_max.astype(np.float64)
+    l_min = l_min.astype(np.float64)
+    l_max = l_max.astype(np.float64)
 
     # compute local contrast
-    contrast_variable = (v_max - v_min) / (v_max + v_min)
+    contrast_variable = (l_max - l_min) / (l_max + l_min)
 
     # get average across whole image
     average_contrast = 100 * np.mean(contrast_variable)
@@ -490,7 +495,7 @@ with open('log.txt', 'a') as f:
 
 # reading all pictures
 for filename in glob.glob(
-        './top/*.*'):
+        './Test Samples/top-Test-Set/*.png'):
     # read pic into variable
     image = cv2.imread(filename)
 
@@ -594,6 +599,6 @@ for filename in glob.glob(
                 else:
                     f.write('fail;' + str(cookie_color) + ";" + str(box_circle_output) + ";" + str(contrast_value) + ";" + str(identifier_check) + ";" + str(koekje_verification) + '\n')
 
-        cv2.setTrackbarPos('Next Photo', 'image', 1)
+        #cv2.setTrackbarPos('Next Photo', 'image', 1)
 
 cv2.destroyAllWindows()
