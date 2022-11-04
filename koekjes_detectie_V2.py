@@ -286,9 +286,9 @@ def box_circle_drawer(input_gray_image, original_image):
     print("output_number_shape:", output_number_shape)
     return output_number_shape
 
-def contrast(contrast_image):
+def contrast(image_contrast_input):
  # convert to LAB color space
-    contrast_image = cv2.cvtColor(image_copy_contrast, cv2.COLOR_BGR2LAB)
+    contrast_image = cv2.cvtColor(image_contrast_input, cv2.COLOR_BGR2LAB)
 
     # separate channels
     L, A, B = cv2.split(contrast_image)
@@ -338,7 +338,7 @@ def contrast(contrast_image):
         check_number_contrast = 404
 
     print("output_number_contrast:", check_number_contrast, average_contrast)
-    return check_number_contrast
+    return check_number_contrast, average_contrast
 
 
 def cookie_identifier(color, shape, contrast):
@@ -580,9 +580,15 @@ for filename in glob.glob(
             box_circle_output = box_circle_drawer(gray_image, image)
 
             image_copy_contrast = image.copy()
-            contrast_value = contrast(image_copy_contrast)
+            contrast_value, contrast_avarage = contrast(image_copy_contrast)
 
             identifier_check = cookie_identifier(cookie_color, box_circle_output, contrast_value)
+
+            with open('color_log.txt', 'a') as f:
+                    f.write(str(blue_value) + ";" + str(green_value) + ";" + str(red_value) + ";" + str(koekje_verification) + '\n')
+
+            with open('contrast_log.txt', 'a') as f:
+                    f.write(str(contrast_avarage) + ";" + str(koekje_verification) + '\n')
 
             with open('log.txt', 'a') as f:
                 if identifier_check == koekje_verification:
@@ -592,6 +598,6 @@ for filename in glob.glob(
                 else:
                     f.write('fail;' + str(cookie_color) + ";" + str(box_circle_output) + ";" + str(contrast_value) + ";" + str(identifier_check) + ";" + str(koekje_verification) + '\n')
 
-        # cv2.setTrackbarPos('Next Photo', 'image', 1)
+        cv2.setTrackbarPos('Next Photo', 'image', 1)
 
 cv2.destroyAllWindows()
