@@ -124,56 +124,56 @@ def color_identifier(blue_value, green_value, red_value):
     # choco chip = 5
     # stroopwafel = 6
 
-    output_number_color = 0
+    output_number_color = ["color"]
 
-    if blue_value >= 900 and green_value <= 200 and red_value <= 200:
+    if (425 <= blue_value <= 1200) and (75 <= green_value <= 145) and (55 <= red_value <= 130):
         koekje = "Kokosmacroon"
-        output_number_color = 1
+        output_number_color.append(1)
 
         # Kokosmacroon
         # Blue => Y 900 tussen x 0 en x 25
         # Red Green < 200
 
-    elif (200 <= blue_value <= 260) and (200 <= green_value <= 260) and (200 <= red_value <= 260):
+    if (90 <= blue_value <= 480) and (55 <= green_value <= 450) and (40 <= red_value <= 440):
         koekje = "Pennywafel Choco kant"
-        output_number_color = 2
+        output_number_color.append(2)
         # Pennywafel Choco kant
         # Red Green Blue => 200 && =< 260
 
-    elif (35 < blue_value < 90): #and (35 < green_value < 70) and (35 < red_value < 70):
+    if (20 <= blue_value <= 95) and (15 <= green_value <= 95) and (10 <= red_value <= 95): #and (35 < green_value < 70) and (35 < red_value < 70):
         koekje = "Pennywafel NIET choco"
-        output_number_color = 3
+        output_number_color.append(3)
         # Pennywafel NIET choco kant
         # Red Green Blue => 35 && =< 70
 
-    elif (325 < blue_value < 500) and (0 < green_value < 100) and (0 < red_value < 100):
+    if (90 < blue_value < 730) and (45 < green_value < 90) and (45 < red_value < 120):
         koekje = "Vlinder koekje"
-        output_number_color = 4
+        output_number_color.append(4)
 
         # Vlinder koekje
         # Blue => 325 && <= 500
         # Red Green <= 100
-    elif (500 < blue_value < 800) and (50 < green_value < 300) and (50 < red_value < 300):
+    if (180 < blue_value < 760) and (70 < green_value < 220) and (70 < red_value < 220):
         koekje = "Choco chip"
-        output_number_color = 5
+        #output_number_color.append(5)
         # Choco chip
         # BLue => 500 && <= 800
         # Red Green => 100 && <= 300
-    elif (500 < blue_value < 850) and (100 < green_value < 1000) and (100 < red_value < 1000):
+    if (500 < blue_value < 1200) and (140 < green_value < 220) and (115 < red_value < 170):
         koekje = "stroopwafel"
-        output_number_color = 6
-    else:
-        koekje = 404
-        output_number_color = 404
+        #output_number_color.append(6)
 
     if koekje == "Choco chip" or koekje == "stroopwafel":
         if pixel_counter(chocolate_detector) >= 20:
             koekje = "Choco chip"
-            output_number_color = 5
+            output_number_color.append(5)
         else:
             koekje = "stroopwafel"
-            output_number_color = 6
+            output_number_color.append(6)
 
+    if len(output_number_color) == 1:
+        koekje = 404
+        output_number_color.append(404)
 
     print("output_number_color:", output_number_color, koekje)
     return output_number_color
@@ -190,6 +190,7 @@ def box_circle_drawer(input_gray_image, original_image):
     counter = 0
     # make variable for storing max difference and set it to 0
     max_difference = 0
+    output_number_shape = []
 
     # loop 360 times (rotating the image 360 degrees)
     while counter <= 360:
@@ -278,10 +279,10 @@ def box_circle_drawer(input_gray_image, original_image):
 
     if max_difference > 50:
         # if cookie is rectangle
-        output_number_shape = 1
+        output_number_shape = ["shape", 2, 3]
     else:
         # cookie is square
-        output_number_shape = 0
+        output_number_shape = ["shape", 1, 4, 5, 6]
 
     print("output_number_shape:", output_number_shape)
     return output_number_shape
@@ -310,32 +311,36 @@ def contrast(image_contrast_input):
 
     print("average_contrast:", str(average_contrast) + "%")
 
-    if 6.5 <= average_contrast <= 7.5:
+
+    check_number_contrast = ["contrast"]
+
+    if 5 <= average_contrast <= 7.2:
         # Kokosmacroon
-        check_number_contrast = 1
+        check_number_contrast.append(1)
 
-    elif 4 <= average_contrast < 4.2:
+
+    if 2 <= average_contrast < 4.5:
         # Pennywafel Choco kant
-        check_number_contrast = 2
+        check_number_contrast.append(2)
 
-    elif 3.6 <= average_contrast <= 3.9:
+    if 3 <= average_contrast <= 4.5:
         # Pennywafel NIET choco
-        check_number_contrast = 3
+        check_number_contrast.append(3)
 
-    elif 2.8 <= average_contrast <= 3.2:
+    if 2 <= average_contrast <= 4.5:
         # Vlinder koekje
-        check_number_contrast = 4
+        check_number_contrast.append(4)
 
-    elif 4.2 <= average_contrast <= 4.4:
+    if 3 <= average_contrast <= 6:
         # Choco chip
-        check_number_contrast = 5
+        check_number_contrast.append(5)
 
-    elif 5.5 <= average_contrast <= 5.7:
+    if 5 <= average_contrast <= 6.5:
         # stroopwafel
-        check_number_contrast = 6
+        check_number_contrast.append(6)
 
-    else:
-        check_number_contrast = 404
+    if check_number_contrast == 1:
+        check_number_contrast.append(404)
 
     print("output_number_contrast:", check_number_contrast, average_contrast)
     return check_number_contrast, average_contrast
@@ -343,44 +348,34 @@ def contrast(image_contrast_input):
 
 def cookie_identifier(color, shape, contrast):
 
-    check_number = 0
+    combined_array = color + shape + contrast
 
-    if color == 1 and shape == 0 and contrast == 1:
-        # Kokosmacroon
-        koekje_identified = "Kokosmacroon"
-        check_number = 1
+    biggest_number = combined_array.count(1)
+    koekje_nummer = 1
+    if combined_array.count(2) > biggest_number:
+        biggest_number = combined_array.count(2)
+        koekje_nummer = 2
 
-    elif color == 2 and shape == 1 and contrast == 2:
-        # Pennywafel Choco kant
-        koekje_identified = "Pennywafel Choco kant"
-        check_number = 2
+    if combined_array.count(3) > biggest_number:
+        biggest_number = combined_array.count(3)
+        koekje_nummer = 3
 
-    elif color == 3 and shape == 1 and contrast == 3:
-        # Pennywafel NIET choco
-        koekje_identified = "Pennywafel NIET choco"
-        check_number = 3
+    if combined_array.count(4) > biggest_number:
+        biggest_number = combined_array.count(4)
+        koekje_nummer = 4
 
-    elif color == 4 and shape == 0 and contrast == 4:
-        # Vlinder koekje
-        koekje_identified = "Vlinder koekje"
-        check_number = 4
+    if combined_array.count(5) > biggest_number:
+        biggest_number = combined_array.count(5)
+        koekje_nummer = 5
 
-    elif color == 5 and shape == 0 and contrast == 5:
-        # Choco chip
-        koekje_identified = "Choco chip"
-        check_number = 5
+    if combined_array.count(6) > biggest_number:
+        biggest_number = combined_array.count(6)
+        koekje_nummer = 6
 
-    elif color == 6 and shape == 0 and contrast == 6:
-        # stroopwafel
-        koekje_identified = "stroopwafel"
-        check_number = 6
+    print(combined_array)
+    print("biggest number: ", biggest_number, "koekje nummer: ", koekje_nummer)
 
-    else:
-        koekje_identified = 404
-
-    print("koekje is: ", koekje_identified)
-
-    return check_number
+    return koekje_nummer
 
 # #def lines(input_image, lower_canny, upper_canny):
 #     dst = cv2.Canny(input_image, lower_canny, upper_canny, None, 3)
