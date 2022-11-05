@@ -10,13 +10,18 @@ import numpy as np
 from matplotlib import pyplot as plt
 import imutils
 
+
 def scaling(image_for_scaling, scale_percent):
 
     # Scaling setup
     if scale_percent == None:
         scale_percent = 30  # percent of original size
+
+    # setting scaling for width and height
     width = int(image.shape[1] * scale_percent / 100)
     height = int(image.shape[0] * scale_percent / 100)
+
+    # set dimensions
     dim = (width, height)
     # resize image
     image_for_scaling = cv2.resize(image_for_scaling, dim, interpolation=cv2.INTER_AREA)
@@ -47,9 +52,10 @@ def static_windows():
         # RGB
         cv2.imshow("RGB - Blue Red channel swap", image_RGB)  # Good
         # Original image
-    cv2.imshow("original_image", original_image)
-    # Grayscaled image
-    cv2.imshow("Gray", gray_image)
+    if mydebug == 1:
+        cv2.imshow("original_image", original_image)
+        # Grayscaled image
+        cv2.imshow("Gray", gray_image)
 
 
 def binary_conversion(image_to_binary, name):
@@ -57,7 +63,8 @@ def binary_conversion(image_to_binary, name):
 
     ret, thresh = cv2.threshold(image_to_binary, 150, 255, cv2.THRESH_BINARY)
     # visualize the binary image
-    cv2.imshow(name, thresh)
+    if mydebug == 1:
+        cv2.imshow(name, thresh)
 
     return thresh
 
@@ -69,8 +76,8 @@ def erosion_dilation(img, kernel_1, kernel_2, iterations_trackbar):
     img_erosion = cv2.erode(img_dilation, kernel, iterations=iterations_trackbar)
 
     edges_gray_erosion_dialation = np.hstack((img_erosion, img_dilation))
-
-    cv2.imshow("edges_gray_erosion_dialation", edges_gray_erosion_dialation)
+    if mydebug == 1:
+        cv2.imshow("edges_gray_erosion_dialation", edges_gray_erosion_dialation)
 
     return img_erosion, img_dilation
 
@@ -110,7 +117,7 @@ def histogram_rgb_max_value(image, mask):
         histr_r = cv2.calcHist([image], [2], mask, [256], [0, 256])
     histr_r_max = max(histr_r)
 
-    print(histr_b_max, histr_g_max, histr_r_max)
+    print("Blue", histr_b_max, "Green", histr_g_max, "Red", histr_r_max)
 
     return histr_b_max, histr_g_max, histr_r_max
 
@@ -125,6 +132,7 @@ def color_identifier(blue_value, green_value, red_value):
     # stroopwafel = 6
 
     output_number_color = ["color"]
+    koekje = "opgegeten"
 
     if (425 <= blue_value <= 1200) and (75 <= green_value <= 145) and (55 <= red_value <= 130):
         koekje = "Kokosmacroon"
@@ -181,7 +189,7 @@ def color_identifier(blue_value, green_value, red_value):
 
 def rotator(image, rotation_angle):
     rotate_image = imutils.rotate(image, rotation_angle)
-    cv2.imshow("rotate_image", rotate_image)
+    # cv2.imshow("rotate_image", rotate_image)
     return rotate_image
 
 
@@ -198,15 +206,20 @@ def box_circle_drawer(input_gray_image, original_image):
         # rotate gray image
         input_gray_image_rotated = rotator(input_gray_image, counter)
         # rotate original image
-        original_image_rotated = rotator(original_image, counter)
+        #original_image_rotated = rotator(original_image, counter)
 
         # make edge image of input image
         edges_gray = cv2.Canny(input_gray_image_rotated, 110, 0)
 
         # copy input image for later use
-        input_2 = original_image_rotated.copy()
-        input_3 = original_image_rotated.copy()
-        input_4 = original_image_rotated.copy()
+        # input_2 = original_image_rotated.copy()
+        # input_3 = original_image_rotated.copy()
+        # input_4 = original_image_rotated.copy()
+
+        input_2 = input_gray_image_rotated.copy()
+        input_3 = input_gray_image_rotated.copy()
+        input_4 = input_gray_image_rotated.copy()
+
 
         # detect the image_contour_create on the binary/edge image using cv2.CHAIN_APPROX_NONE
         contours, hierarchy = cv2.findContours(image=edges_gray, mode=cv2.RETR_TREE, method=cv2.CHAIN_APPROX_NONE)
@@ -241,21 +254,21 @@ def box_circle_drawer(input_gray_image, original_image):
         # draw rectangle
         cv2.rectangle(input_3, (x, y), (x + w, y + h), (0, 255, 0), 2)
 
-        #find middle point of X axis. (X bottom + (X bottom + width) divided by 2 to find the middel
-        Circle_x = int((x + x + w) / 2)
-        # find middle point of Y axis (Y bottom + (Y bottom + hight) divided by 2 to find the middel
-        Circle_y = int((y + y + h) / 2)
-
-
-        if Circle_x > x:
-            Radius = Circle_x - x
-        elif x > Circle_x:
-            Radius = x - Circle_x
-
-        cv2.circle(input_4, (Circle_x, Circle_y), Radius, (0, 0, 255), -1)
+        # #find middle point of X axis. (X bottom + (X bottom + width) divided by 2 to find the middel
+        # Circle_x = int((x + x + w) / 2)
+        # # find middle point of Y axis (Y bottom + (Y bottom + hight) divided by 2 to find the middel
+        # Circle_y = int((y + y + h) / 2)
+        #
+        #
+        # if Circle_x > x:
+        #     Radius = Circle_x - x
+        # elif x > Circle_x:
+        #     Radius = x - Circle_x
+        #
+        # cv2.circle(input_4, (Circle_x, Circle_y), Radius, (0, 0, 255), -1)
 
         combined_image = cv2.bitwise_and(input_2, input_3, mask=None)
-        combined_image = cv2.bitwise_and(combined_image, input_4, mask=None)
+        # combined_image = cv2.bitwise_and(combined_image, input_4, mask=None)
 
         # Loop counter + 1
         counter = counter + 1
@@ -280,12 +293,15 @@ def box_circle_drawer(input_gray_image, original_image):
     if max_difference > 50:
         # if cookie is rectangle
         output_number_shape = ["shape", 2, 3]
+        output_shape = 1
     else:
         # cookie is square
         output_number_shape = ["shape", 1, 4, 5, 6]
+        output_shape = 0
 
     print("output_number_shape:", output_number_shape)
-    return output_number_shape
+    return output_number_shape, output_shape
+
 
 def contrast(image_contrast_input):
  # convert to LAB color space
@@ -309,7 +325,7 @@ def contrast(image_contrast_input):
     # get average across whole image
     average_contrast = 100 * np.mean(contrast_variable)
 
-    print("average_contrast:", str(average_contrast) + "%")
+    #print("average_contrast:", str(average_contrast) + "%")
 
 
     check_number_contrast = ["contrast"]
@@ -372,10 +388,10 @@ def cookie_identifier(color, shape, contrast):
         biggest_number = combined_array.count(6)
         koekje_nummer = 6
 
-    print(combined_array)
-    print("biggest number: ", biggest_number, "koekje nummer: ", koekje_nummer)
+    print("combined_array", combined_array)
+    print("biggest number amount:", biggest_number, "koekje nummer:", koekje_nummer)
 
-    return koekje_nummer
+    return koekje_nummer, biggest_number
 
 # #def lines(input_image, lower_canny, upper_canny):
 #     dst = cv2.Canny(input_image, lower_canny, upper_canny, None, 3)
@@ -413,6 +429,7 @@ def cookie_identifier(color, shape, contrast):
 #     cv2.imshow("Detected Lines (in red) - Standard Hough Line Transform", cdst)
 #     cv2.imshow("Detected Lines (in red) - Probabilistic Line Transform", cdstP)
 
+
 def koekje_name_finder(koekje_name):
 
     koekje_name = filename.partition("_")
@@ -442,9 +459,10 @@ def koekje_name_finder(koekje_name):
     else:
         koekje_verification_number = 405
 
-    print(koekje_name)
+    print("Koekjes Filename:", koekje_name)
 
     return koekje_verification_number
+
 
 def trackbars():
     img = np.zeros((300, 512, 3), np.uint8)
@@ -476,123 +494,146 @@ def trackbars():
 
     cv2.setTrackbarPos('upper_canny', 'image', 200)
 
+
 trackbars()
 
-with open('log.txt', 'a') as f:
-        f.write('XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n')
+mydebug = 0
 
-# reading all pictures
-for filename in glob.glob(
-        './top/*.*'):
-    # read pic into variable
-    image = cv2.imread(filename)
+with open('log.txt', 'w') as f:
+    f.write('Succes_or_fail;Koekjes_Filename;Blue_value;Green_value;Red_value;Shape_value;Contrast_value;output_number_color;output_number_shape;output_number_contrast;most_common_number_amount;koekje_nummer\n')
 
-    koekje_verification = koekje_name_finder(filename)
+    # reading all pictures
+    for filename in glob.glob(
+            './top/*.*'):
+        # read pic into variable
+        image = cv2.imread(filename)
 
-    # scale image
-    image = scaling(image, None)
+        koekje_verification = koekje_name_finder(filename)
 
-    # Make backup of pic
-    original_image = image.copy()
+        # scale image
+        image = scaling(image, None)
 
-    # cycle counter reset
-    cycle_counter = 0
+        # Make backup of pic
+        original_image = image.copy()
 
-    # making gray_image gray
-    # gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY) - OUD, zet in verslag
-    gray_image = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
-    # making new image where Blue and Red channels are swapped. Eigenlijk zie je BGR
-    # image_RGB = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-    image_RGB = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
-    # converting image to HSV 0-179 from RGB 0-255. De parameters worden 1 op 1 overgezet, en alles boven de 179 wordt verandered naar: 0 + de orginele waarde - 179
-    image_HSV = cv2.cvtColor(image, cv2.COLOR_RGB2HSV)
+        # cycle counter reset
+        cycle_counter = 0
 
-    # Making a copy of an image for later processing.
-    image_HSV_S = image_HSV[:, :, 1].copy()
+        # making gray_image gray
+        # gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY) - OUD, zet in verslag
+        gray_image = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
+        # making new image where Blue and Red channels are swapped. Eigenlijk zie je BGR
+        # image_RGB = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+        image_RGB = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+        # converting image to HSV 0-179 from RGB 0-255. De parameters worden 1 op 1 overgezet, en alles boven de 179 wordt verandered naar: 0 + de orginele waarde - 179
+        image_HSV = cv2.cvtColor(image, cv2.COLOR_RGB2HSV)
 
-    # create static windows for visualization purpose.
-    static_windows()
+        # Making a copy of an image for later processing.
+        image_HSV_S = image_HSV[:, :, 1].copy()
 
-    # activate main program loop.
-    while (True):
+        # create static windows for visualization purpose.
+        static_windows()
 
-        # for button pressing and changing
-        k = cv2.waitKey(1) & 0xFF
-        if k == 27:
-            break
+        # activate main program loop.
+        while (True):
 
-        # Trackbar Sliders
-        Close_Program = cv2.getTrackbarPos('Close Program', 'image')
-        Next_Picture = cv2.getTrackbarPos('Next Photo', 'image')
-        kernel_1 = cv2.getTrackbarPos('kernel_1', 'image')
-        kernel_2 = cv2.getTrackbarPos('kernel_2', 'image')
-        iterations_trackbar = cv2.getTrackbarPos('iterations_trackbar', 'image')
-        lower_canny = cv2.getTrackbarPos('lower_canny', 'image')
-        upper_canny = cv2.getTrackbarPos('upper_canny', 'image')
+            # for button pressing and changing
+            k = cv2.waitKey(1) & 0xFF
+            if k == 27:
+                break
 
-        if Close_Program == 1:
-            break
-        if Next_Picture == 1:
-            cv2.setTrackbarPos('Next Photo', 'image', 0)
-            break
+            # Trackbar Sliders
+            Close_Program = cv2.getTrackbarPos('Close Program', 'image')
+            Next_Picture = cv2.getTrackbarPos('Next Photo', 'image')
+            kernel_1 = cv2.getTrackbarPos('kernel_1', 'image')
+            kernel_2 = cv2.getTrackbarPos('kernel_2', 'image')
+            iterations_trackbar = cv2.getTrackbarPos('iterations_trackbar', 'image')
+            lower_canny = cv2.getTrackbarPos('lower_canny', 'image')
+            upper_canny = cv2.getTrackbarPos('upper_canny', 'image')
 
-        # apply binary thresholding
-        binary_HSV_S = binary_conversion(image_HSV_S, "binary_HSV_S")
+            if Close_Program == 1:
+                break
+            if Next_Picture == 1:
+                cv2.setTrackbarPos('Next Photo', 'image', 0)
+                break
 
-        # making final mask version
-        final_mask, _ = erosion_dilation(binary_HSV_S, kernel_1, kernel_2, iterations_trackbar)
+            # apply binary thresholding
+            binary_HSV_S = binary_conversion(image_HSV_S, "binary_HSV_S")
 
-        # copying original image, on this copy the final mask will be applied.
-        original_masked = original_image.copy()
-        # placing mask on image
-        original_masked = cv2.bitwise_and(original_masked, original_masked, mask=final_mask)
+            # making final mask version
+            final_mask, _ = erosion_dilation(binary_HSV_S, kernel_1, kernel_2, iterations_trackbar)
 
-        cv2.imshow("original_masked", original_masked)
+            # copying original image, on this copy the final mask will be applied.
+            original_masked = original_image.copy()
+            # placing mask on image
+            original_masked = cv2.bitwise_and(original_masked, original_masked, mask=final_mask)
+            if mydebug == 1:
+                cv2.imshow("original_masked", original_masked)
 
-#########################################################################
-        # Cookie identification from here on!
-#########################################################################
+    #########################################################################
+            # Cookie identification from here on!
+    #########################################################################
 
-        lower_red = np.array([10, 10, 10], dtype="uint8")
+            lower_red = np.array([10, 10, 10], dtype="uint8")
 
-        upper_red = np.array([69, 69, 69], dtype="uint8")
+            upper_red = np.array([69, 69, 69], dtype="uint8")
 
-        chocolate_detector = cv2.inRange(original_masked, lower_red, upper_red)
+            chocolate_detector = cv2.inRange(original_masked, lower_red, upper_red)
 
-        cv2.imshow("chocolate_detector", chocolate_detector)
+            if mydebug == 1:
+                cv2.imshow("chocolate_detector", chocolate_detector)
 
-        #lines(original_masked, lower_canny, upper_canny)
+            #lines(original_masked, lower_canny, upper_canny)
 
-        if cycle_counter == 0:
-            cycle_counter = 1
+            if cycle_counter == 0:
+                cycle_counter = 1
 
-            histogram_rgb_plot(original_image, final_mask)
+                histogram_rgb_plot(original_image, final_mask)
 
-            blue_value, green_value, red_value = histogram_rgb_max_value(original_image, final_mask)
+                blue_value, green_value, red_value = histogram_rgb_max_value(original_image, final_mask)
 
-            cookie_color = color_identifier(blue_value, green_value, red_value)
+                cookie_color = color_identifier(blue_value, green_value, red_value)
 
-            box_circle_output = box_circle_drawer(gray_image, image)
+                box_circle_output, shape_number = box_circle_drawer(gray_image, image)
 
-            image_copy_contrast = image.copy()
-            contrast_value, contrast_avarage = contrast(image_copy_contrast)
+                image_copy_contrast = image.copy()
+                contrast_value, contrast_average = contrast(image_copy_contrast)
 
-            identifier_check = cookie_identifier(cookie_color, box_circle_output, contrast_value)
+                identifier_check, biggest_number = cookie_identifier(cookie_color, box_circle_output, contrast_value)
 
-            with open('color_log.txt', 'a') as f:
-                    f.write(str(blue_value) + ";" + str(green_value) + ";" + str(red_value) + ";" + str(koekje_verification) + '\n')
-
-            with open('contrast_log.txt', 'a') as f:
-                    f.write(str(contrast_avarage) + ";" + str(koekje_verification) + '\n')
-
-            with open('log.txt', 'a') as f:
                 if identifier_check == koekje_verification:
-                    f.write('success\n')
+                    f.write('success;')
                 elif identifier_check == 404:
-                    f.write('error\n')
+                    f.write('error;')
                 else:
-                    f.write('fail;' + str(cookie_color) + ";" + str(box_circle_output) + ";" + str(contrast_value) + ";" + str(identifier_check) + ";" + str(koekje_verification) + '\n')
+                    f.write('fail;')
 
-        cv2.setTrackbarPos('Next Photo', 'image', 1)
+                # Koekjes filename added to log
+                f.write(str(koekje_verification) + ';')
 
-cv2.destroyAllWindows()
+                blue_value_str = str(blue_value[0])[:-2]
+                green_value_str = str(green_value[0])[:-2]
+                red_value_str = str(red_value[0])[:-2]
+
+                # Blue, Green, Red value added to log
+                f.write(blue_value_str + ";" + green_value_str + ";" + red_value_str + ";")
+                # Shape Number added to log
+                f.write(str(shape_number) + ";")
+                # Contrast value added to log
+                contrast_average_str = str(contrast_average).replace(".", ",")
+                f.write(contrast_average_str + ";")
+
+                # output_number_color added to log
+                f.write(str(cookie_color) + ";")
+                # output_number_shape added to log
+                f.write(str(box_circle_output) + ";")
+                # output_number_contrast added to log
+                f.write(str(contrast_value) + ";")
+                # most common number amount added to log
+                f.write(str(biggest_number) + ";")
+                # Koekje nummer added to log
+                f.write(str(identifier_check) + "\n")
+
+            cv2.setTrackbarPos('Next Photo', 'image', 1)
+
+    cv2.destroyAllWindows()
