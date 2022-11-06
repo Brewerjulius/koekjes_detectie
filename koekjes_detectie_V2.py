@@ -52,16 +52,6 @@ def pixel_counter(image):
     return number_of_white_pix
 
 
-def histogram_rgb_plot(image, mask):
-    # make and show a B G R histogram plot
-    color = ('b', 'g', 'r')
-    for i, col in enumerate(color):
-        histr = cv2.calcHist([image], [i], mask, [256], [0, 256])
-        plt.plot(histr, color=col)
-        plt.xlim([0, 256])
-    plt.show()
-
-
 def histogram_rgb_max_value(image, mask):
     # get the max value of 'b' from the histogram
     color = ('b')
@@ -298,7 +288,7 @@ def contrast_functie(image_contrast_input):
         # append 6 to array
         check_number_contrast.append(6)
 
-    if check_number_contrast == 1:
+    if len(check_number_contrast) == 1:
         # append 404 to array
         check_number_contrast.append(404)
 
@@ -432,12 +422,10 @@ with open('log.txt', 'w') as f:
             original_masked = original_image.copy()
             # placing mask on image
             original_masked = cv2.bitwise_and(original_masked, original_masked, mask=final_mask)
-
+            cv2.imshow("original_masked", original_masked)
     #########################################################################
             # Cookie identification from here on!
     #########################################################################
-
-            # histogram_rgb_plot(original_image, final_mask)
 
             blue_value, green_value, red_value = histogram_rgb_max_value(original_image, final_mask)
 
@@ -457,6 +445,8 @@ with open('log.txt', 'w') as f:
             # match outcome with verification number (for development only).
             if identifier_check == koekje_verification:
                 f.write('success;')
+            elif koekje_verification == 405:
+                f.write('error;')
             elif identifier_check == 404:
                 f.write('error;')
             else:
